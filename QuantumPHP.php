@@ -48,7 +48,7 @@ class QuantumPHP
 	 * whether to send the log as a cookie or a HTTP header
 	 * valid values are 1 for all, 2 for cookie only, 3 for header only
 	 */
-	public static $MODE = 1;
+	public static $MODE = 2;
 
 
 	/**
@@ -90,7 +90,7 @@ class QuantumPHP
 	/**
 	 * @var array
 	 */
-	 private static $statuses = array('status','critical','failure','error','warning','success','notice','info');
+	 private static $statuses = ['status','critical','failure','error','warning','success','notice','info'];
 
     /**
      * @var string
@@ -131,16 +131,16 @@ class QuantumPHP
     /**
      * @var array
      */
-    protected $_json = array(
+    protected $_json = [
         'version' => self::VERSION,
-        'columns' => array('log', 'backtrace', 'type'),
-        'rows' => array()
-    );
+        'columns' => ['log', 'backtrace', 'type'],
+        'rows' => []
+    ];
 
     /**
      * @var array
      */
-    protected $_backtraces = array();
+    protected $_backtraces = [];
 
     /**
      * @var bool
@@ -150,9 +150,9 @@ class QuantumPHP
     /**
      * @var array
      */
-    protected $_settings = array(
+    protected $_settings = [
         self::BACKTRACE_LEVEL => 1
-    );
+    ];
 
     /**
      * @var QuantumPHP
@@ -164,7 +164,7 @@ class QuantumPHP
      *
      * @var array
      */
-    protected $_processed = array();
+    protected $_processed = [];
 
     /**
      * constructor
@@ -297,9 +297,9 @@ class QuantumPHP
 
         $logger = self::getInstance();
 
-        $logger->_processed = array();
+        $logger->_processed = [];
 
-        $logs = array();
+        $logs = [];
         foreach ($args as $arg) {
             $logs[] = $logger->_convert($arg);
         }
@@ -332,7 +332,7 @@ class QuantumPHP
         //Also avoid recursion when objects refer to each other
         $this->_processed[] = $object;
 
-        $object_as_array = array();
+        $object_as_array = [];
 
         // first add the class name
         $object_as_array['___class_name'] = get_class($object);
@@ -424,7 +424,7 @@ class QuantumPHP
             $this->_backtraces[] = $backtrace;
         }
 
-        $row = array($logs, $backtrace, $type);
+        $row = [$logs, $backtrace, $type];
 
         $this->_json['rows'][] = $row;
         $this->_writeHeader($this->_json);
@@ -434,9 +434,8 @@ class QuantumPHP
 	{
 		if(self::$MODE == 1 || self::$MODE == 2)
 		{
-			$encdata = $data['rows'][0][0][0];
-			$encdata = $this->_shrinkLog(encdata);
-			setcookie('fortephplog',$encdata);
+			$encdata = $this->_shrinkLog($data);
+			setcookie('fortephplog',json_encode($encdata));
 		}
 		if(self::$MODE == 1 || self::$MODE == 3)
 		{
@@ -562,7 +561,7 @@ class QuantumPHP
 			throw new Exception('Debug status is not valid: '.print_r($level,true));
 		}
 
-		$backtrace = debug_backtrace()
+		$backtrace = debug_backtrace();
 		$file = $backtrace[0]['file'];
 		$line = $backtrace[0]['line'];
 
@@ -614,10 +613,7 @@ class QuantumPHP
 			return;
 		}
 
-		self::add('Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB');
-
-		$lines = [['Time','Level','Comment','Function','File','Path']];
-
+		
 		$level_count = [];
 		foreach(self::$statuses as $s){
 			$level_count[$s] = 0;
@@ -640,6 +636,11 @@ class QuantumPHP
 				$table_header .= ' ('.$num.' '.$level.' message'.$s.')';
 			}
 		}
+		
+		self::add('Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB');
+
+		array_unshift($this->_debug_list, [['Time','Level','Comment','Function','File','Path']]);
+
 
 		// send server logs to browser
 		\QuantumPHP::table($this->_debug_list);

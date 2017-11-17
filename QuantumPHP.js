@@ -19,20 +19,19 @@
  * @package QuantumPHP
  * @author Frank Forte <frank.forte@gmail.com>
  */
- 
+
  var ffQunatumPhp = {};
 /**
- * Get a cookie value. If the value is valid json, 
+ * Get a cookie value. If the value is valid json,
  * the return value will be the result of JSON.parse(value)
  *
  * @param string
  * @return mixed value
  */
 ffQunatumPhp.getcookie = function(c_name){
-	
 	var c_value = document.cookie;
 	var c_start = c_value.indexOf(" " + c_name + "=");
-	
+
 	if (c_start == -1){ c_start = c_value.indexOf(c_name + "=");}
 	if (c_start == -1){ c_value = null;}
 	else{
@@ -51,9 +50,25 @@ ffQunatumPhp.getcookie = function(c_name){
  */
 (ffQunatumPhp.show_console = function(){
 	try{
+		// get logs from gookie
 		var log = JSON.parse(atob(ffQunatumPhp.getcookie('fortephplog')));
-		if(!log){ log =["no log"]; }
-		console.table(log);
+		if(log){
+
+			for(var i in log["rows"]){
+
+				if(log["rows"][i][2] == "table"){
+					console.table(log["rows"][i][0][0]);
+				} else {
+
+					for(var j in log["rows"][i][0]){
+						console[log["rows"][i][2]](log["rows"][i][0][j] + " in " +log["rows"][i][1]);
+					}
+
+				}
+			}
+
+		}
+		// clear cookie to prevent repeated logs
 		document.cookie = "fortephplog=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 	} catch (e) {}
 })();
