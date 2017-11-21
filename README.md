@@ -70,3 +70,6 @@ QuantumPHP::send();
 ```
 
 Finally, hit F12 in your browser to open developer tools, and view the output under the "console" tab.
+
+
+Please submit any issues you have: https://github.com/frankforte/quantumphp/issues

@@ -29,7 +29,7 @@ class QuantumPHP
     /**
      * @var string
      */
-    const VERSION = '1.0.0';
+    const VERSION = '1.0.1';
 
     /**
      * @var string
@@ -613,7 +613,6 @@ class QuantumPHP
 			return;
 		}
 
-		
 		$level_count = [];
 		foreach(self::$statuses as $s){
 			$level_count[$s] = 0;
@@ -636,7 +635,7 @@ class QuantumPHP
 				$table_header .= ' ('.$num.' '.$level.' message'.$s.')';
 			}
 		}
-		
+
 		self::add('Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB');
 
 		array_unshift($this->_debug_list, [['Time','Level','Comment','Function','File','Path']]);
