@@ -29,7 +29,7 @@ class QuantumPHP
     /**
      * @var string
      */
-    const VERSION = '1.0.1';
+    const VERSION = '1.0.2';
 
     /**
      * @var string
@@ -124,6 +124,7 @@ class QuantumPHP
 
     /**
      * @var int
+
      */
     protected $_debug_list;
 
@@ -435,7 +436,7 @@ class QuantumPHP
 		if(self::$MODE == 1 || self::$MODE == 2)
 		{
 			$encdata = $this->_shrinkLog($data);
-			setcookie('fortephplog',json_encode($encdata));
+			setcookie('fortephplog',json_encode($encdata),3600,'/');
 		}
 		if(self::$MODE == 1 || self::$MODE == 3)
 		{
@@ -556,6 +557,7 @@ class QuantumPHP
 
 	public static function add($comment, $level = 'status', $exceptionObj = null)
 	{
+		
 		if(!in_array($level,self::$statuses))
 		{
 			throw new Exception('Debug status is not valid: '.print_r($level,true));
@@ -591,8 +593,10 @@ class QuantumPHP
 		{
 			$function = '';
 		}
+		
+		$logger = self::getInstance();
 
-		$entry['timestamp'] = microtime(true) - $this->_start_time;
+		$entry['timestamp'] = microtime(true) - $logger->_start_time;
 		$entry['comment'] = $comment;
 		$entry['function'] = $function;
 		$entry['level'] = $level;
@@ -600,7 +604,8 @@ class QuantumPHP
 		$entry['line'] = $line;
 		$entry['exception'] = $exceptionObj;
 
-		$this->_debug_list[] = $entry;
+		
+		$logger->_debug_list[] = $entry;
 	}
 
 	/**
@@ -618,7 +623,8 @@ class QuantumPHP
 			$level_count[$s] = 0;
 		}
 
-		foreach($this->_debug_list as $entry)
+		$logger = self::getInstance();
+		foreach($logger->_debug_list as $entry)
 		{
 			if($entry['level'] != 'status')
 			{
@@ -638,11 +644,11 @@ class QuantumPHP
 
 		self::add('Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB');
 
-		array_unshift($this->_debug_list, [['Time','Level','Comment','Function','File','Path']]);
+		array_unshift($logger->_debug_list, [['Time','Level','Comment','Function','File','Path']]);
 
 
 		// send server logs to browser
-		\QuantumPHP::table($this->_debug_list);
+		\QuantumPHP::table($logger->_debug_list);
 	}
 
 }
