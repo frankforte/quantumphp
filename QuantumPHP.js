@@ -72,13 +72,17 @@ ffQunatumPhp.getcookie = function(c_name){
 				} else {
 
 					for(var j in log["rows"][i][0]){
-						console[log["rows"][i][2]](log["rows"][i][0][j] + " in " +log["rows"][i][1]);
+						if(typeof console[ log["rows"][i][2] ] != "undefined" ){
+							console[log["rows"][i][2]](log["rows"][i][0][j] + " in " +log["rows"][i][1]);
+						} else {
+							console.log(log["rows"][i][0]+" in "+log["rows"][i][1]);
+						}
 					}
 
 				}
 			}
 		}
-	} catch (e) {}
+	} catch (e) {console.log(e)}
 	// clear cookie to prevent repeated logs
 	document.cookie = "fortephplog=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 })();
