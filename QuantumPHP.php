@@ -29,7 +29,7 @@ class QuantumPHP
     /**
      * @var string
      */
-    const VERSION = '1.0.2';
+    const VERSION = '1.0.3';
 
     /**
      * @var string
@@ -436,7 +436,7 @@ class QuantumPHP
 		if(self::$MODE == 1 || self::$MODE == 2)
 		{
 			$encdata = $this->_shrinkLog($data);
-			setcookie('fortephplog',json_encode($encdata),3600,'/');
+			setcookie('fortephplog',$encdata,time()+3600,'/');
 		}
 		if(self::$MODE == 1 || self::$MODE == 3)
 		{
@@ -557,7 +557,7 @@ class QuantumPHP
 
 	public static function add($comment, $level = 'status', $exceptionObj = null)
 	{
-		
+
 		if(!in_array($level,self::$statuses))
 		{
 			throw new Exception('Debug status is not valid: '.print_r($level,true));
@@ -593,7 +593,7 @@ class QuantumPHP
 		{
 			$function = '';
 		}
-		
+
 		$logger = self::getInstance();
 
 		$entry['timestamp'] = microtime(true) - $logger->_start_time;
@@ -604,7 +604,6 @@ class QuantumPHP
 		$entry['line'] = $line;
 		$entry['exception'] = $exceptionObj;
 
-		
 		$logger->_debug_list[] = $entry;
 	}
 
@@ -648,7 +647,7 @@ class QuantumPHP
 
 
 		// send server logs to browser
-		\QuantumPHP::table($logger->_debug_list);
+		self::table($logger->_debug_list);
 	}
 
 }

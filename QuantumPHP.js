@@ -13,13 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+ // prevent errors in browsers without console
+if(!console){
+	console = {};
+	var calls = ["log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
+    "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile", "profileEnd","table"];
+	for(var i = 0; i < calls.length; i++){
+		console[calls[i]] = function(){};
+	}
+	window.console = console;
+}
+
 /**
  * Client Side Firefox 57+ (Quantum) PHP debugger class
  *
  * @package QuantumPHP
  * @author Frank Forte <frank.forte@gmail.com>
  */
-
  var ffQunatumPhp = {};
 /**
  * Get a cookie value. If the value is valid json,
@@ -66,9 +77,8 @@ ffQunatumPhp.getcookie = function(c_name){
 
 				}
 			}
-
 		}
-		// clear cookie to prevent repeated logs
-		document.cookie = "fortephplog=; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 	} catch (e) {}
+	// clear cookie to prevent repeated logs
+	document.cookie = "fortephplog=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 })();
