@@ -1,5 +1,5 @@
 ## Overview
-QuantumPHP is a PHP and JavaScript library that can log server side variables directly to the JavaScript console in various browsers like Firefox Quantum, without the requirement of a browser extension or add-on.
+QuantumPHP is a PHP and JavaScript library that can log server side variables directly to the developer tools console in various browsers like Firefox Quantum, with or  without the use of a browser extension or add-on.
 
 
 ## Requirements
@@ -7,34 +7,56 @@ QuantumPHP is a PHP and JavaScript library that can log server side variables di
 
 ## Installation
 
-### 1. Add QuantumPHP to your composer.json file
+### 1. Add QuantumPHP to your project
 
-    "repositories": [
-        {"type": "vcs", "url": "https://github.com/frankforte/quantumphp"}
-    ],
-    "require": {
-        "frankforte/quantumphp": "^1.0"
-    }
+a) composer require frankforte/quantumphp
 
-### 2. install the package
+or
 
-   composer install
+b) git clone https://github.com/frankforte/quantumphp.git vendor/frankforte/quantumphp
 
-### 3. Copy  the QuantumPHP.js file into your public directory
+
+### 2. Get QuamtumPHP in your browser:
+
+#### a) For Firefox, add the following light weight add-on:
+
+https://addons.mozilla.org/en-US/firefox/addon/quantumphp/
+
+or
+
+#### b) For Google Chrome, install the Chrome extension:
+
+https://chrome.google.com/extensions/detail/noaneddfkdjfnfdakjjmocngnfkfehhd
+
+More information can be found here:
+http://www.chromelogger.com
+
+or
+
+#### c) copy the JavaScript file into your public directory and include it in your HTML.
+
+for example:
 
     cp vendor/frankforte/quantumphp/QuantumPHP.js public_html/js/QuantumPHP.js
 
-You can also copy it manually in your file system, just make sure the target path is correct, you might use something other than `public_html`
 
-### 4. Include the code.
+Then add the file to the HTML template
+
+    <script src="/js/QuantumPHP.js"></script>
+
+
+### 3. Use it in your project:
 
 Add this to your PHP file. The 'add' method will add rich information to the logs in a table format.
 
 ```php
 <?php
+
+// optional if you do not have an autoloader
 include 'QuantumPHP.php';
 
-// optional, also send the X-ChromeLogger-Data header
+// optional, set mode 1 for Chrome and Firefox, mode 2 for just Firefox mode 3 for just Chrome.
+// defaults to mode 2
 // QuantumPHP::$MODE = 1;
 
 QuantumPHP::log('Regular log');
@@ -47,14 +69,4 @@ QuantumPHP::log($_SERVER);
 QuantumPHP::send();
 ```
 
-Add this to the HTML template
-
-    <script src="/js/QuantumPHP.js"></script>
-
-
-### 5. (optional) Install the Chrome extension:
-
-https://chrome.google.com/extensions/detail/noaneddfkdjfnfdakjjmocngnfkfehhd
-
-More information can be found here:
-http://www.chromelogger.com
+Finally, hit F12 in your browser to open developer tools, and view the output under the "console" tab.
