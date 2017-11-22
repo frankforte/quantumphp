@@ -29,7 +29,7 @@ class QuantumPHP
     /**
      * @var string
      */
-    const VERSION = '1.0.7';
+    const VERSION = '1.0.8';
 
     /**
      * @var string
@@ -313,7 +313,7 @@ class QuantumPHP
             $backtrace_message = $backtrace[$level]['file'] . ' : ' . $backtrace[$level]['line'];
         }
 
-        $logger->_addRow($logs, $backtrace_message, $type);
+        $logger->_addRow($logs, $backtrace_message, $type, $prepend);
     }
 
     /**
@@ -588,7 +588,7 @@ class QuantumPHP
         return $this->_settings[$key];
     }
 
-	public static function add($comment, $level = 'status', $exceptionObj = null)
+	public static function add($comment, $level = 'status', $exceptionObj = false, $time = false, $file = false, $line = false, $function = false)
 	{
 
 		if(!in_array($level,self::$statuses))
@@ -597,39 +597,42 @@ class QuantumPHP
 		}
 
 		$backtrace = debug_backtrace();
-		$file = $backtrace[0]['file'];
-		$line = $backtrace[0]['line'];
+		$file = $file === false ? $file : $backtrace[0]['file'];
+		$line = $line === false ? $line : $backtrace[0]['line'];
 
-		if(isset($backtrace[1]['function']))
+		if($function === false)
 		{
-			$function = $backtrace[1]['function'];
-
-			if(isset($backtrace[1]['object']))
+			if(isset($backtrace[1]['function']))
 			{
-				if(method_exists($backtrace[1]['object'],'__tostring'))
-				{
-					$function = $backtrace[1]['object'].$backtrace[1]['type'].$function;
-				}
-				else
-				{
-					$function = get_class($backtrace[1]['object']).$backtrace[1]['type'].$function;
-				}
-			}
-			elseif(isset($backtrace[1]['class']))
-			{
-				$function = $backtrace[1]['class'].$backtrace[1]['type'].$function;
-			}
+				$function = $backtrace[1]['function'];
 
-			$function .= '()';
-		}
-		else
-		{
-			$function = '';
+				if(isset($backtrace[1]['object']))
+				{
+					if(method_exists($backtrace[1]['object'],'__tostring'))
+					{
+						$function = $backtrace[1]['object'].$backtrace[1]['type'].$function;
+					}
+					else
+					{
+						$function = get_class($backtrace[1]['object']).$backtrace[1]['type'].$function;
+					}
+				}
+				elseif(isset($backtrace[1]['class']))
+				{
+					$function = $backtrace[1]['class'].$backtrace[1]['type'].$function;
+				}
+
+				$function .= '()';
+			}
+			else
+			{
+				$function = '';
+			}
 		}
 
 		$logger = self::getInstance();
 
-		$entry['Time'] = microtime(true) - $logger->_start_time;
+		$entry['Time'] = $time ? $time : microtime(true) - $logger->_start_time;
 		$entry['Level'] = $level;
 		$entry['Comment'] = $comment;
 		$entry['Function'] = $function;
@@ -667,7 +670,7 @@ class QuantumPHP
 			{
 				if($entry['Level'] != 'status')
 				{
-					$level_count[$entry['level']]++;
+					$level_count[$entry['Level']]++;
 				}
 			}
 		}
@@ -682,7 +685,7 @@ class QuantumPHP
 			}
 		}
 
-		$logger::_log('info', [$table_header.' Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB '.$_SERVER['REQUEST_URI']], true);
+		$logger::_log('info', [$table_header.' Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB '], true);
 
 		self::table($logger->_debug_list);
 
