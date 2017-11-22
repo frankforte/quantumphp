@@ -29,7 +29,7 @@ class QuantumPHP
     /**
      * @var string
      */
-    const VERSION = '1.0.5';
+    const VERSION = '1.0.6';
 
     /**
      * @var string
@@ -429,7 +429,7 @@ class QuantumPHP
 
         $this->_json['rows'][] = $row;
     }
-	
+
 	/**
      * Sends debug logs to the browser
      *
@@ -617,13 +617,18 @@ class QuantumPHP
 
 		$logger = self::getInstance();
 
-		$entry['timestamp'] = microtime(true) - $logger->_start_time;
-		$entry['comment'] = $comment;
-		$entry['function'] = $function;
-		$entry['level'] = $level;
-		$entry['file'] = $file;
-		$entry['line'] = $line;
-		$entry['exception'] = $exceptionObj;
+		$entry['Time'] = microtime(true) - $logger->_start_time;
+		$entry['Level'] = $level;
+		$entry['Comment'] = $comment;
+		$entry['Function'] = $function;
+		$entry['File'] = $file;
+		$entry['Line'] = $line;
+		$entry['Exception'] = !$exceptionObj ? null : [
+			 'message' => $exceptionObj->getMessage()
+			,'file' => $exceptionObj->getFile()
+			,'line' => $exceptionObj->getLine()
+			,'trace' => $exceptionObj->getTrace()
+		];
 
 		$logger->_debug_list[] = $entry;
 	}
@@ -669,7 +674,7 @@ class QuantumPHP
 		self::add('Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB');
 
 		self::table($logger->_debug_list);
-		
+
 		// send server logs to browser
 		$logger->_writeLogs($logger->_json);
 	}

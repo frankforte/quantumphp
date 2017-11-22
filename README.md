@@ -79,6 +79,14 @@ QuantumPHP::add('Hello console table!');
 QuantumPHP::add('Something Bad','error');
 QuantumPHP::add('Something Really Bad','critical');
 // QuantumPHP::log($_SERVER); // you will need mode 0 for this!
+try
+{
+	throw new Exception('Something Bad!!');
+}
+catch(Exception $e)
+{
+	\QuantumPHP::add('test','warning',$e);
+}
 QuantumPHP::send();
 ```
 
