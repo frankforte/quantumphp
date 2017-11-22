@@ -52,12 +52,25 @@ Add this to your PHP file. The 'add' method will add rich information to the log
 ```php
 <?php
 
-// optional if you do not have an autoloader
+// Optional if you do not have an autoloader
 include 'QuantumPHP.php';
 
-// optional, set mode 1 for Chrome and Firefox, mode 2 for just Firefox mode 3 for just Chrome.
-// defaults to mode 2
-// QuantumPHP::$MODE = 1;
+/**
+ * Optional debugging mode
+ * mode = 1 for Chrome and Firefox
+ * mode 2 for just Firefox
+ * mode 3 for just Chrome
+ * mode 0 when you have a HUGE-MONGOUS log, and
+ *    HTTP headers break the server or browser...
+ *    WARNING: mode 0 will echo the log in an HTML comment, so 
+ *    no more http headers can be sent once you call QuantumPHP::send()
+ *    (unless you use output buffering)
+ * defaults to mode 2
+ */
+QuantumPHP::$MODE = 2;
+
+// Optional debug size. Defaults to 5kB
+QuantumPHP::$HEADER_LIMIT = 16000;
 
 QuantumPHP::log('Regular log');
 QuantumPHP::warn('Regular warn');
@@ -65,7 +78,7 @@ QuantumPHP::error('Regular error');
 QuantumPHP::add('Hello console table!');
 QuantumPHP::add('Something Bad','error');
 QuantumPHP::add('Something Really Bad','critical');
-QuantumPHP::log($_SERVER);
+// QuantumPHP::log($_SERVER); // you will need mode 0 for this!
 QuantumPHP::send();
 ```
 

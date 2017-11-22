@@ -29,7 +29,7 @@ class QuantumPHP
     /**
      * @var string
      */
-    const VERSION = '1.0.4';
+    const VERSION = '1.0.5';
 
     /**
      * @var string
@@ -132,7 +132,7 @@ class QuantumPHP
     /**
      * @var array
      */
-    protected $_json = [
+    public $_json = [
         'version' => self::VERSION,
         'columns' => ['log', 'backtrace', 'type'],
         'rows' => []
@@ -428,30 +428,49 @@ class QuantumPHP
         $row = [$logs, $backtrace, $type];
 
         $this->_json['rows'][] = $row;
-        $this->_writeHeader($this->_json);
     }
-
-	protected function _writeHeader($data)
+	
+	/**
+     * Sends debug logs to the browser
+     *
+     * @var mixed
+     * @return void
+     */
+	protected function _writeLogs($data)
 	{
+		if(self::$MODE == 0)
+		{
+			echo '<!-- fortephplog '.$this->_encode($data).' -->';
+		}
 		if(self::$MODE == 1 || self::$MODE == 2)
 		{
 			$encdata = $this->_shrinkLog($data);
-			setcookie('fortephplog',$encdata,time()+3600,'/');
+
+			// cookies larger than 4kB can break
+			$bits = str_split($encdata, 2000);
+			$i = 0;
+			foreach($bits as $bite)
+			{
+				setcookie('fortephplog'.$i,$bite,time()+3600,'/');
+				$i++;
+			}
 		}
 		if(self::$MODE == 1 || self::$MODE == 3)
 		{
+			// Not sure if Chrome Logger allows chunking of header
+			// If so, we can update this to match chunked cookies above
 			header(self::HEADER_NAME . ': ' . $encdata);
 		}
 	}
 
 	/**
-	* checks if headers will be too large. If so, it
-	* will remove notices first, then other types until
-	* the header will be small enough.
-	* @author Frank Forte <frank.forte@gmail.com>
-	* @var array
-	* @return string
-	*/
+	 * checks if headers will be too large. If so, it
+	 * will remove notices first, then other types until
+	 * the header will be small enough.
+	 * @author Frank Forte <frank.forte@gmail.com>
+	 * @var array
+	 * @return string
+	 */
 	protected function _shrinkLog($data)
     {
 		$encdata = $this->_encode($data);
@@ -461,6 +480,7 @@ class QuantumPHP
 			array_unshift($data['rows'],[['!! WARNING !!! Headers too large, log truncated to prevent Apache 500 Server Error.', 'QuantumPHP: '.__LINE__, self::ERROR]]);
 		}
 		/*
+		If we want to check the entire header size, use this for good estimate:
 		$cur = headers_list();
 		$cur = json_encode($cur);
 		$cursize = strlen($cur);
@@ -476,7 +496,8 @@ class QuantumPHP
 				{
 					foreach($row[0] as $k => $ro)
 					{
-						if($data['rows'][$j][0][$k][sizeof($data['rows'][$j][0][$k]) -1][1] == 'status')
+						$len = sizeof($data['rows'][$j][0][$k]) -1;
+						if($row[$k][$len][3] == 'status')
 						{
 							array_pop($data['rows'][$j][0][$k]);
 								$shrinking = true;
@@ -623,15 +644,18 @@ class QuantumPHP
 		}
 
 		$logger = self::getInstance();
-		foreach($logger->_debug_list as $entry)
+		if(!empty($logger->_debug_list))
 		{
-			if($entry['level'] != 'status')
+			foreach($logger->_debug_list as $entry)
 			{
-				$level_count[$entry['level']]++;
+				if($entry['level'] != 'status')
+				{
+					$level_count[$entry['level']]++;
+				}
 			}
 		}
 
-		$table_header = 'QuantumPHP Output';
+		$table_header = "QuantumPHP: ";
 		foreach($level_count as $level=>$num)
 		{
 			if($num > 0)
@@ -641,10 +665,13 @@ class QuantumPHP
 			}
 		}
 
+		self::info($table_header);
 		self::add('Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB');
 
-		// send server logs to browser
 		self::table($logger->_debug_list);
+		
+		// send server logs to browser
+		$logger->_writeLogs($logger->_json);
 	}
 
 }
