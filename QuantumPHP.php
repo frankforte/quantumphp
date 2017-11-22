@@ -29,7 +29,7 @@ class QuantumPHP
     /**
      * @var string
      */
-    const VERSION = '1.0.6';
+    const VERSION = '1.0.7';
 
     /**
      * @var string
@@ -289,7 +289,7 @@ class QuantumPHP
      * @param string $type
      * @return void
      */
-    protected static function _log($type, array $args)
+    protected static function _log($type, array $args, $prepend = false)
     {
         // nothing passed in, don't do anything
         if (count($args) == 0 && $type != self::GROUP_END) {
@@ -408,7 +408,7 @@ class QuantumPHP
      * @var mixed
      * @return void
      */
-    protected function _addRow(array $logs, $backtrace, $type)
+    protected function _addRow(array $logs, $backtrace, $type, $prepend = false)
     {
         // if this is logged on the same line for example in a loop, set it to null to save space
         if (in_array($backtrace, $this->_backtraces)) {
@@ -427,7 +427,11 @@ class QuantumPHP
 
         $row = [$logs, $backtrace, $type];
 
-        $this->_json['rows'][] = $row;
+		if( !$prepend ){
+			$this->_json['rows'][] = $row;
+		} else {
+			array_unshift($this->_json['rows'], $row);
+		}
     }
 
 	/**
@@ -438,6 +442,14 @@ class QuantumPHP
      */
 	protected function _writeLogs($data)
 	{
+		// in case cookie mode was used, prevent previous log from persisting
+		$i = 0;
+		while(isset($_COOKIE['fortephplog'.$i]))
+		{
+			setcookie('fortephplog'.$i,'',time()-28400,'/');
+			$i++;
+		}
+
 		if(self::$MODE == 0)
 		{
 			echo '<!-- fortephplog '.$this->_encode($data).' -->';
@@ -653,14 +665,14 @@ class QuantumPHP
 		{
 			foreach($logger->_debug_list as $entry)
 			{
-				if($entry['level'] != 'status')
+				if($entry['Level'] != 'status')
 				{
 					$level_count[$entry['level']]++;
 				}
 			}
 		}
 
-		$table_header = "QuantumPHP: ";
+		$table_header = "QuantumPHP ".self::VERSION.': '.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].' ';
 		foreach($level_count as $level=>$num)
 		{
 			if($num > 0)
@@ -670,13 +682,16 @@ class QuantumPHP
 			}
 		}
 
-		self::info($table_header);
-		self::add('Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB');
+		$logger::_log('info', [$table_header.' Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB '.$_SERVER['REQUEST_URI']], true);
 
 		self::table($logger->_debug_list);
 
 		// send server logs to browser
 		$logger->_writeLogs($logger->_json);
+
+		// prevent re-sending logs
+		$logger->_debug_list = [];
+
 	}
 
 }
