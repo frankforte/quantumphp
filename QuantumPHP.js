@@ -56,10 +56,11 @@ ffQunatumPhp.getcookie = function(c_name){
 /**
  * Retrieves and parses the server log, and adds it to the developer console
  */
-ffQunatumPhp.show_console = function(){
+ffQunatumPhp.show_console = function(log){
 	try{
+		if( typeof log == "undefined"){ var log = ""; }
+
 		// get logs from gookie, one bite at a time
-		var log = "";
 		var i = 0;
 		do{
 			var bite = ffQunatumPhp.getcookie('fortephplog'+i);
@@ -68,7 +69,7 @@ ffQunatumPhp.show_console = function(){
 			}
 			i++;
 		} while (bite);
-		
+
 		// no logs in the cookies? check HTML body for logs
 		if(!log){
 			for(var i in document.childNodes){
@@ -76,12 +77,12 @@ ffQunatumPhp.show_console = function(){
 				if(document.childNodes[i].nodeType == 8){
 					var match = document.childNodes[i].nodeValue.match(/ fortephplog ([^> ]+) /);
 					if(match){
-						ffQunatumPhp.show_console(match[1]);
+						log = match[1];
 						break;
 					}
 				}
 			}
-		} 
+		}
 		if(log !== ""){ log = JSON.parse(atob(log)); }
 
 		if(log){
@@ -92,7 +93,6 @@ ffQunatumPhp.show_console = function(){
 					console.table(log["rows"][i][0][0]);
 				} else {
 					for(var j in log["rows"][i][0]){
-// console.log(log["rows"][i][0])
 						if(typeof console[ log["rows"][i][2] ] != "undefined" ){
 							console[log["rows"][i][2]](log["rows"][i][0][j] + " [" +log["rows"][i][1]+"]");
 						} else {
@@ -103,8 +103,21 @@ ffQunatumPhp.show_console = function(){
 				}
 			}
 		}
-	} catch (e) {console.log(e)}
+	} catch (e) {console.log(e.fileName+" line "+e.lineNumber+" col"+e.columnNumber+" "+e.message)}
 	// clear cookie to prevent repeated logs
 	document.cookie = "fortephplog=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+	ffQunatumPhp.lastCookie = document.cookie
 }
-ffQunatumPhp.show_console();
+
+// ffQunatumPhp.show_console();
+// browser.cookies.onChanged.addListener(ffQunatumPhp.show_console)
+
+ffQunatumPhp.lastCookie = '';
+ffQunatumPhp.cookieUpdate = function(){
+	if(ffQunatumPhp.lastCookie != document.cookie){
+		ffQunatumPhp.lastCookie = document.cookie;
+		ffQunatumPhp.show_console();
+	}
+	cookieChanged = setTimeout(ffQunatumPhp.cookieUpdate, 2500);
+}
+ffQunatumPhp.cookieUpdate();
