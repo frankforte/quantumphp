@@ -48,6 +48,7 @@ Then add the file to the HTML template
 ### 3. Use it in your project:
 
 Add this to your PHP file. The 'add' method will add rich information to the logs in a table format.
+Note: objects and arrays should be logged with the "add" method: `QuantumPHP::add($object);`
 
 ```php
 <?php
@@ -72,9 +73,12 @@ QuantumPHP::$MODE = 2;
 // Optional debug size. Defaults to 5kB
 QuantumPHP::$HEADER_LIMIT = 16000;
 
+// Logging strings
 QuantumPHP::log('Regular log');
 QuantumPHP::warn('Regular warn');
 QuantumPHP::error('Regular error');
+
+// Logging strings, objects, or arrays
 QuantumPHP::add('Hello console table!');
 QuantumPHP::add('Something Bad','error');
 QuantumPHP::add('Something Really Bad','critical');
