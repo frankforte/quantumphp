@@ -687,7 +687,10 @@ class QuantumPHP
 
 		$logger::_log('info', [$table_header.' Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB '], true);
 
-		self::table($logger->_debug_list);
+		if(!empty($logger->_debug_list))
+		{
+			self::table($logger->_debug_list);
+		}
 
 		// send server logs to browser
 		$logger->_writeLogs($logger->_json);
