@@ -597,8 +597,8 @@ class QuantumPHP
 		}
 
 		$backtrace = debug_backtrace();
-		$file = $file === false ? $file : $backtrace[0]['file'];
-		$line = $line === false ? $line : $backtrace[0]['line'];
+		$file = $file !== false ? $file : $backtrace[0]['file'];
+		$line = $line !== false ? $line : $backtrace[0]['line'];
 
 		if($function === false)
 		{
