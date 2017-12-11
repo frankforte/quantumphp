@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// prevent errors in browsers without console
+/* prevent errors in browsers without console */
 if(!console){
 	console = {};
 	var calls = ["log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
@@ -53,39 +53,59 @@ ffQunatumPhp.getcookie = function(c_name){
 	}
 	return c_value;
 };
+
+/**
+ * Get log from cookie(s), then clears each cookie
+ * @return string base64 encoded log
+ */
+ffQunatumPhp.cookie_log = function(){
+
+	/* get logs from gookie, one bite at a time */
+	var log = "";
+	var i = 0;
+	do{
+		var bite = ffQunatumPhp.getcookie('fortephplog'+i);
+		if(bite != null){
+			log = log+bite;
+
+			/* clear cookie to prevent repeat logs */
+			document.cookie = "fortephplog"+i+"=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+		}
+		i++;
+	} while (bite);
+
+	return log;
+}
+
+/**
+ * Get log from HTML comment
+ * @return string base64 encoded log
+ */
+ffQunatumPhp.comment_log = function(){
+
+	var log = "";
+	for(var i in document.childNodes){
+
+		if(document.childNodes[i].nodeType == 8){
+			var match = document.childNodes[i].nodeValue.match(/ fortephplog ([^> ]+) /);
+			if(match){
+				log = match[1];
+				break;
+			}
+		}
+	}
+
+	return log;
+}
+
 /**
  * Retrieves and parses the server log, and adds it to the developer console
  */
 ffQunatumPhp.show_console = function(log){
 	try{
-		if( typeof log == "undefined"){ var log = ""; }
-
-		// get logs from gookie, one bite at a time
-		var i = 0;
-		do{
-			var bite = ffQunatumPhp.getcookie('fortephplog'+i);
-			if(bite != null){
-				log = log+bite;
-			}
-			i++;
-		} while (bite);
-
-		// no logs in the cookies? check HTML body for logs
-		if(!log){
-			for(var i in document.childNodes){
-
-				if(document.childNodes[i].nodeType == 8){
-					var match = document.childNodes[i].nodeValue.match(/ fortephplog ([^> ]+) /);
-					if(match){
-						log = match[1];
-						break;
-					}
-				}
-			}
-		}
-		if(log !== ""){ log = JSON.parse(atob(log)); }
-
 		if(log){
+
+			if(typeof(log) == "string"){ log = JSON.parse(atob(log)); }
 
 			for(var i in log["rows"]){
 
@@ -104,20 +124,34 @@ ffQunatumPhp.show_console = function(log){
 			}
 		}
 	} catch (e) {console.log(e.fileName+" line "+e.lineNumber+" col"+e.columnNumber+" "+e.message)}
-	// clear cookie to prevent repeated logs
-	document.cookie = "fortephplog=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
-	ffQunatumPhp.lastCookie = document.cookie
 }
 
-// ffQunatumPhp.show_console();
-// browser.cookies.onChanged.addListener(ffQunatumPhp.show_console)
 
+ffQunatumPhp.lastComment = '';
 ffQunatumPhp.lastCookie = '';
-ffQunatumPhp.cookieUpdate = function(){
-	if(ffQunatumPhp.lastCookie != document.cookie){
-		ffQunatumPhp.lastCookie = document.cookie;
-		ffQunatumPhp.show_console();
+var cookieChanged = false;
+ffQunatumPhp.logUpdate = function(){
+
+	try{
+		var log = ffQunatumPhp.cookie_log();
+		if(ffQunatumPhp.lastCookie != log){
+			ffQunatumPhp.lastCookie = log;
+			ffQunatumPhp.show_console(log);
+		}
+
+		var log = ffQunatumPhp.comment_log();
+		if(ffQunatumPhp.lastComment != log){
+			ffQunatumPhp.lastComment = log;
+			ffQunatumPhp.show_console(log);
+		}
+
+		/* Use timeout if included in HTML, or when cookies.onChanged does not work in web extension */
+		cookieChanged = setTimeout(ffQunatumPhp.logUpdate, 2500);
+
+	} catch (e) {
+		console.log(e.fileName+" line "+e.lineNumber+" col"+e.columnNumber+" "+e.message)
 	}
-	cookieChanged = setTimeout(ffQunatumPhp.cookieUpdate, 2500);
 }
-ffQunatumPhp.cookieUpdate();
+
+/* start update loop */
+ffQunatumPhp.logUpdate();
