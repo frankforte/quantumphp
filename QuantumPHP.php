@@ -489,8 +489,9 @@ class QuantumPHP
 
 		if(strlen($encdata) > self::$HEADER_LIMIT)
 		{
-			array_unshift($data['rows'],[['!! WARNING !!! Headers too large, log truncated to prevent Apache 500 Server Error.', 'QuantumPHP: '.__LINE__, self::ERROR]]);
+			array_unshift($data['rows'],[['!! WARNING !!! Headers too large, log truncated to prevent Apache 500 Server Error.'], 'QuantumPHP: '.__LINE__, self::ERROR]);
 		}
+
 		/*
 		If we want to check the entire header size, use this for good estimate:
 		$cur = headers_list();
@@ -500,6 +501,7 @@ class QuantumPHP
 		while(strlen($encdata) > self::$HEADER_LIMIT)
 		{
 			$shrinking = false;
+
 			// first remove regular status messages from tables from start to finish
 			// try to leave behind warnings, errors
 			foreach($data['rows'] as $j => $row)
@@ -508,33 +510,101 @@ class QuantumPHP
 				{
 					foreach($row[0] as $k => $ro)
 					{
-						$len = sizeof($data['rows'][$j][0][$k]) -1;
-						if($row[$k][$len][3] == 'status')
+						$len = sizeof($ro) -1;
+
+						// $ro is array of messages in the table
+						// loop through them from end to start
+						for($i = $len; $i >=0; $i --)
 						{
-							array_pop($data['rows'][$j][0][$k]);
+
+							if(isset($data['rows'][$j][0][$k][$i]['Level'])
+								&& $data['rows'][$j][0][$k][$i]['Level'] == 'status')
+							{
+								// remove this message
+								unset($data['rows'][$j][0][$k][$i]);
 								$shrinking = true;
-								break;
+								break 3;
+							}
+
+							// old array structure
+							elseif(isset($data['rows'][$j][0][$k][$i][3])
+								&& $data['rows'][$j][0][$k][$i][3] == 'status')
+							{
+								// remove this message
+								unset($data['rows'][$j][0][$k][$i]);
+								$shrinking = true;
+								break 3;
+							}
+						}
+						// still not shrinking?  remove everything but errors
+						for($i = $len; $i >=0; $i --)
+						{
+
+							if(isset($data['rows'][$j][0][$k][$i]['Level'])
+								&& $data['rows'][$j][0][$k][$i]['Level'] != 'error')
+							{
+								// remove this message
+								unset($data['rows'][$j][0][$k][$i]);
+								$shrinking = true;
+								break 3;
+							}
+
+							// old array structure
+							elseif(isset($data['rows'][$j][0][$k][$i][3])
+								&& $data['rows'][$j][0][$k][$i][3] != 'error')
+							{
+								// remove this message
+								unset($data['rows'][$j][0][$k][$i]);
+								$shrinking = true;
+								break 3;
+							}
 						}
 					}
 				}
 			}
-			// no status messages to remove from the table log?
+
+			// only errors left in the tables, or no tables to shrink
+			// lets remove regular logs
 			if(!$shrinking)
 			{
-				// remove regular logs
-				if(isset($row[0][2]) && $row[0][2] !== 'error')
+				foreach($data['rows'] as $j => $row)
 				{
-					unset($data['rows']);
-					$shrinking = true;
+					if(isset($row[$j][2]) && in_array($row[$j][2],self::$statuses))
+					{
+						if($row[$j][2] !== 'error')
+						{
+							unset($data['rows'][$j]);
+							$shrinking = true;
+							break;
+						}
+					}
 				}
-				// ok, if nothing else, remove debug messages from start to finish
-				else
+
+			}
+
+			// ok now remove some errors in the table
+			foreach($data['rows'] as $j => $row)
+			{
+				if(isset($row[2]) && $row[2] === 'table')
 				{
-					array_pop($data['rows']);
+					foreach($row[0] as $k => $ro)
+					{
+						array_pop($data['rows'][$j][0][$k]);
+						$shrinking = true;
+						break 2;
+					}
 				}
 			}
+
+			// last resort - remove each debug entry until we are small enough or empty
+			if(!$shrinking)
+			{
+				array_pop($data['rows']);
+			}
+
 			$encdata = $this->_encode($data);
 		}
+
 		return $encdata;
 	}
 

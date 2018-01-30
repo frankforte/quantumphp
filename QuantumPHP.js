@@ -31,7 +31,7 @@ if(!console){
  * @package QuantumPHP
  * @author Frank Forte <frank.forte@gmail.com>
  */
- var ffQunatumPhp = {};
+ var ffQuantumPhp = {};
 /**
  * Get a cookie value. If the value is valid json,
  * the return value will be the result of JSON.parse(value)
@@ -39,7 +39,7 @@ if(!console){
  * @param string
  * @return mixed value
  */
-ffQunatumPhp.getcookie = function(c_name){
+ffQuantumPhp.getcookie = function(c_name){
 	var c_value = document.cookie;
 	var c_start = c_value.indexOf(" " + c_name + "=");
 	if (c_start == -1){ c_start = c_value.indexOf(c_name + "=");}
@@ -58,13 +58,13 @@ ffQunatumPhp.getcookie = function(c_name){
  * Get log from cookie(s), then clears each cookie
  * @return string base64 encoded log
  */
-ffQunatumPhp.cookie_log = function(){
+ffQuantumPhp.cookie_log = function(){
 
 	/* get logs from gookie, one bite at a time */
 	var log = "";
 	var i = 0;
 	do{
-		var bite = ffQunatumPhp.getcookie('fortephplog'+i);
+		var bite = ffQuantumPhp.getcookie('fortephplog'+i);
 		if(bite != null){
 			log = log+bite;
 
@@ -81,7 +81,7 @@ ffQunatumPhp.cookie_log = function(){
  * Get log from HTML comment
  * @return string base64 encoded log
  */
-ffQunatumPhp.comment_log = function(){
+ffQuantumPhp.comment_log = function(){
 
 	var log = "";
 	for(var i in document.childNodes){
@@ -101,7 +101,7 @@ ffQunatumPhp.comment_log = function(){
 /**
  * Retrieves and parses the server log, and adds it to the developer console
  */
-ffQunatumPhp.show_console = function(log){
+ffQuantumPhp.show_console = function(log){
 	try{
 		if(log){
 
@@ -127,26 +127,26 @@ ffQunatumPhp.show_console = function(log){
 }
 
 
-ffQunatumPhp.lastComment = '';
-ffQunatumPhp.lastCookie = '';
+ffQuantumPhp.lastComment = '';
+ffQuantumPhp.lastCookie = '';
 var cookieChanged = false;
-ffQunatumPhp.logUpdate = function(){
+ffQuantumPhp.logUpdate = function(){
 
 	try{
-		var log = ffQunatumPhp.cookie_log();
-		if(ffQunatumPhp.lastCookie != log){
-			ffQunatumPhp.lastCookie = log;
-			ffQunatumPhp.show_console(log);
+		var log = ffQuantumPhp.cookie_log();
+		if(ffQuantumPhp.lastCookie != log){
+			ffQuantumPhp.lastCookie = log;
+			ffQuantumPhp.show_console(log);
 		}
 
-		var log = ffQunatumPhp.comment_log();
-		if(ffQunatumPhp.lastComment != log){
-			ffQunatumPhp.lastComment = log;
-			ffQunatumPhp.show_console(log);
+		var log = ffQuantumPhp.comment_log();
+		if(ffQuantumPhp.lastComment != log){
+			ffQuantumPhp.lastComment = log;
+			ffQuantumPhp.show_console(log);
 		}
 
 		/* Use timeout if included in HTML, or when cookies.onChanged does not work in web extension */
-		cookieChanged = setTimeout(ffQunatumPhp.logUpdate, 2500);
+		cookieChanged = setTimeout(ffQuantumPhp.logUpdate, 2500);
 
 	} catch (e) {
 		console.log(e.fileName+" line "+e.lineNumber+" col"+e.columnNumber+" "+e.message)
@@ -154,4 +154,4 @@ ffQunatumPhp.logUpdate = function(){
 }
 
 /* start update loop */
-ffQunatumPhp.logUpdate();
+ffQuantumPhp.logUpdate();
