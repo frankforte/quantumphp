@@ -92,6 +92,8 @@ catch(Exception $e)
 	\QuantumPHP::add('test','warning',$e);
 }
 QuantumPHP::send();
+
+?>
 ```
 
 Finally, hit F12 in your browser to open developer tools, and view the output under the "console" tab.
