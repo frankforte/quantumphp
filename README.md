@@ -9,11 +9,11 @@ QuantumPHP is a PHP and JavaScript library that can log server side variables di
 
 ### 1. Add QuantumPHP to your project
 
-a) composer require frankforte/quantumphp
+a) `composer require frankforte/quantumphp`
 
 or
 
-b) git clone https://github.com/frankforte/quantumphp.git vendor/frankforte/quantumphp
+b) `git clone https://github.com/frankforte/quantumphp.git vendor/frankforte/quantumphp`
 
 
 ### 2. Get QuamtumPHP in your browser:
@@ -83,12 +83,9 @@ QuantumPHP::add('Hello console table!');
 QuantumPHP::add('Something Bad','error');
 QuantumPHP::add('Something Really Bad','critical');
 // QuantumPHP::log($_SERVER); // you will need mode 0 for this!
-try
-{
+try {
 	throw new Exception('Something Bad!!');
-}
-catch(Exception $e)
-{
+} catch(Exception $e) {
 	\QuantumPHP::add('test','warning',$e);
 }
 QuantumPHP::send();
@@ -97,4 +94,4 @@ QuantumPHP::send();
 Finally, hit F12 in your browser to open developer tools, and view the output under the "console" tab.
 
 
-Please submit any issues you have: https://github.com/frankforte/quantumphp/issues
+Please submit any issues you have: https://github.com/frankforte/quantumphp/issues.
