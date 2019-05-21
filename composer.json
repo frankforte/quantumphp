@@ -1,6 +1,6 @@
 {
 	"name": "frankforte/quantumphp",
-	"version": "1.0.11",
+	"version": "1.1.0",
 	"type": "library",
 	"description": "Add server side logs directly to the JavaScript console in various browsers like Firefox Quantum, without the requirement of a browser extension or add-on. A FirePHP and ChromePHP alternative for modern browsers",
 	"keywords": ["server log", "logging"],
@@ -22,9 +22,9 @@
 	"require": {
 		"php": ">=5.6.0"
 	},
-	"autoload": {
-		"psr-0": {
-			"QuantumPHP":""
-		}
-	}
+    "autoload": {
+        "classmap": [
+            "src/"
+        ]
+    }
 }

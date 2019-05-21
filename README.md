@@ -5,6 +5,7 @@ QuantumPHP is a PHP and JavaScript library that can log server side variables di
 ## Requirements
 - PHP 5.6 or later
 
+
 ## Installation
 
 ### 1. Add QuantumPHP to your project
@@ -37,7 +38,7 @@ or
 
 for example:
 
-    cp vendor/frankforte/quantumphp/QuantumPHP.js public_html/js/QuantumPHP.js
+    cp vendor/frankforte/quantumphp/src/QuantumPHP.js public_html/js/QuantumPHP.js
 
 
 Then add the file to the HTML template
@@ -46,6 +47,26 @@ Then add the file to the HTML template
 
 
 ### 3. Use it in your project:
+
+#### Laravel Monolog
+
+Make the class available to your namespace:
+
+    use Monolog\Logger;
+    use FrankForte\QuantumPHP\QuantumPHPHandler;
+
+Use the logger
+
+    $logger = new Logger('my_logger');
+    $logger->pushHandler(new QuantumPHPHandler());
+
+    $test_data = ['foo'=>'bar'];
+    $logger->addInfo('Log Message', $test_data);
+    $logger->warning('Some warning');
+    $logger->critical('Someething Bad');
+
+
+#### Without Monolog or in other PHP projects or frameworks
 
 Add this to your PHP file. The 'add' method will add rich information to the logs in a table format.
 Note: objects and arrays should be logged with the "add" method: `QuantumPHP::add($object);`
@@ -63,7 +84,7 @@ include 'QuantumPHP.php';
  * mode 3 for just Chrome
  * mode 0 when you have a HUGE-MONGOUS log, and
  *    HTTP headers break the server or browser...
- *    WARNING: mode 0 will echo the log in an HTML comment, so 
+ *    WARNING: mode 0 will echo the log in an HTML comment, so
  *    no more http headers can be sent once you call QuantumPHP::send()
  *    (unless you use output buffering)
  * defaults to mode 2
@@ -96,5 +117,9 @@ QuantumPHP::send();
 
 Finally, hit F12 in your browser to open developer tools, and view the output under the "console" tab.
 
+
+## Known bug
+
+If you have multiple tabs open in Firefox with the developer tools console open, the log will sometimes appear on one of the other tabs. Closing those tabs or the console on those tabs appears to prevent the issue.
 
 Please submit any issues you have: https://github.com/frankforte/quantumphp/issues
