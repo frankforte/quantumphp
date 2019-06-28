@@ -99,6 +99,18 @@ ffQuantumPhp.comment_log = function(){
 }
 
 /**
+ * Log exception to the developer console
+ */
+ffQuantumPhp.log_exception(e){
+	var s = "";
+	if(e.fileName){ s += e.fileName;}
+	if(e.lineNumber){ s += " line "+e.lineNumber;}
+	if(e.columnNumber){ s += " col "+e.columnNumber;}
+	if(e.message){ s += " "+e.message;}
+	console.warn(s);
+}
+
+/**
  * Retrieves and parses the server log, and adds it to the developer console
  */
 ffQuantumPhp.show_console = function(log){
@@ -123,9 +135,10 @@ ffQuantumPhp.show_console = function(log){
 				}
 			}
 		}
-	} catch (e) {console.log(e.fileName+" line "+e.lineNumber+" col"+e.columnNumber+" "+e.message)}
+	} catch (e) {
+		ffQuantumPhp.log_exception(e);
+	}
 }
-
 
 ffQuantumPhp.lastComment = '';
 ffQuantumPhp.lastCookie = '';
@@ -149,7 +162,7 @@ ffQuantumPhp.logUpdate = function(){
 		cookieChanged = setTimeout(ffQuantumPhp.logUpdate, 2500);
 
 	} catch (e) {
-		console.log(e.fileName+" line "+e.lineNumber+" col"+e.columnNumber+" "+e.message)
+		ffQuantumPhp.log_exception(e);
 	}
 }
 

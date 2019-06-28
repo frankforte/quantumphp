@@ -35,7 +35,7 @@ class QuantumPHPHandler extends AbstractProcessingHandler
     /**
      * @var string
      */
-    const VERSION = '1.0.11';
+    const VERSION = '1.1.1';
 
     /**
      * @var string
