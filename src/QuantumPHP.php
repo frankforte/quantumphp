@@ -46,7 +46,7 @@ class QuantumPHP
 	/**
 	 * @var string
 	 * whether to send the log as a cookie or a HTTP header
-	 * valid values are 1 for all, 2 for cookie only, 3 for header only
+	 * valid values are 0 for HTML, 1 for cookie and header, 2 for cookie only, 3 for header only
 	 */
 	public static $MODE = 2;
 
@@ -349,7 +349,7 @@ class QuantumPHP
             $object_as_array[$key] = $this->_convert($value);
         }
 
-        $reflection = new ReflectionClass($object);
+        $reflection = new \ReflectionClass($object);
 
         // loop through the properties and add those
         foreach ($reflection->getProperties() as $property) {
@@ -366,7 +366,7 @@ class QuantumPHP
 
             try {
                 $value = $property->getValue($object);
-            } catch (ReflectionException $e) {
+            } catch (\ReflectionException $e) {
                 $value = 'only PHP 5.3 can access private/protected properties';
             }
 
@@ -383,10 +383,10 @@ class QuantumPHP
     /**
      * takes a reflection property and returns a nicely formatted key of the property name
      *
-     * @param ReflectionProperty
+     * @param \ReflectionProperty
      * @return string
      */
-    protected function _getPropertyKey(ReflectionProperty $property)
+    protected function _getPropertyKey(\ReflectionProperty $property)
     {
         $static = $property->isStatic() ? ' static' : '';
         if ($property->isPublic()) {

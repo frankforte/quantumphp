@@ -10,11 +10,11 @@ QuantumPHP is a PHP and JavaScript library that can log server side variables di
 
 ### 1. Add QuantumPHP to your project
 
-a) composer require frankforte/quantumphp
+a) `composer require frankforte/quantumphp`
 
 or
 
-b) git clone https://github.com/frankforte/quantumphp.git vendor/frankforte/quantumphp
+b) `git clone https://github.com/frankforte/quantumphp.git vendor/frankforte/quantumphp`
 
 
 ### 2. Get QuamtumPHP in your browser:

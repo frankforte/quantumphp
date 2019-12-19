@@ -49,6 +49,7 @@ ffQuantumPhp.getcookie = function(c_name){
 		c_start = c_value.indexOf("=", c_start) + 1;
 		var c_end = c_value.indexOf(";", c_start);
 		if (c_end == -1){ c_end = c_value.length; }
+		c_value = c_value.replace(/\+/g," ");
 		c_value = unescape(c_value.substring(c_start,c_end));
 	}
 	return c_value;
