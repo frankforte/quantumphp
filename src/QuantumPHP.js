@@ -102,7 +102,7 @@ ffQuantumPhp.comment_log = function(){
 /**
  * Log exception to the developer console
  */
-ffQuantumPhp.log_exception(e){
+ffQuantumPhp.log_exception = function(e){
 	var s = "";
 	if(e.fileName){ s += e.fileName;}
 	if(e.lineNumber){ s += " line "+e.lineNumber;}
