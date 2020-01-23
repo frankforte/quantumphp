@@ -34,7 +34,7 @@ class QuantumPHPHandler extends AbstractProcessingHandler
     /**
      * @var string
      */
-    const VERSION = '1.1.1';
+    const VERSION = '1.1.3';
 
     /**
      * @var string
@@ -492,11 +492,13 @@ class QuantumPHPHandler extends AbstractProcessingHandler
 		if(self::$MODE == 0)
 		{
 			echo '<!-- fortephplog '.$this->_encode($data).' -->';
+			return;
 		}
+
+		$encdata = $this->_shrinkLog($data);
+
 		if(self::$MODE == 1 || self::$MODE == 2)
 		{
-			$encdata = $this->_shrinkLog($data);
-
 			// cookies larger than 4kB can break
 			$bits = str_split($encdata, 2000);
 			$i = 0;
