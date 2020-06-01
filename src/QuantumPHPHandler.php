@@ -29,12 +29,14 @@ use Monolog\Logger;
  * @author Frank Forte <frank.forte@gmail.com>
  * @author Craig Campbell <iamcraigcampbell@gmail.com>
  */
+use FrankForte\QuantumPHP\Cookie;
+
 class QuantumPHPHandler extends AbstractProcessingHandler
 {
     /**
      * @var string
      */
-    const VERSION = '1.1.3';
+    const VERSION = '1.1.5';
 
     /**
      * @var string
@@ -485,7 +487,7 @@ class QuantumPHPHandler extends AbstractProcessingHandler
 		$i = 0;
 		while(isset($_COOKIE['fortephplog'.$i]))
 		{
-			setcookie('fortephplog'.$i,'',time()-28400,'/');
+			Cookie::send_cookie('fortephplog'.$i,'',time()-28400,'/');
 			$i++;
 		}
 
@@ -504,7 +506,7 @@ class QuantumPHPHandler extends AbstractProcessingHandler
 			$i = 0;
 			foreach($bits as $bite)
 			{
-				setcookie('fortephplog'.$i,$bite,time()+3600,'/');
+				Cookie::send_cookie('fortephplog'.$i,$bite,time()+3600,'/');
 				$i++;
 			}
 		}
