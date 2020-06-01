@@ -31,7 +31,7 @@ class QuantumPHP
     /**
      * @var string
      */
-    const VERSION = '1.1.6';
+    const VERSION = '1.1.8';
 
     /**
      * @var string
