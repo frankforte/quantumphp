@@ -24,12 +24,14 @@
  * @author Frank Forte <frank.forte@gmail.com>
  * @author Craig Campbell <iamcraigcampbell@gmail.com>
  */
+use FrankForte\QuantumPHP\Cookie;
+
 class QuantumPHP
 {
     /**
      * @var string
      */
-    const VERSION = '1.1.3';
+    const VERSION = '1.1.4';
 
     /**
      * @var string
@@ -442,14 +444,6 @@ class QuantumPHP
      */
 	protected function _writeLogs($data)
 	{
-		// in case cookie mode was used, prevent previous log from persisting
-		$i = 0;
-		while(isset($_COOKIE['fortephplog'.$i]))
-		{
-			setcookie('fortephplog'.$i,'',time()-28400,'/');
-			$i++;
-		}
-
 		if(self::$MODE == 0)
 		{
 			echo '<!-- fortephplog '.$this->_encode($data).' -->';
@@ -458,17 +452,25 @@ class QuantumPHP
 
 		$encdata = $this->_shrinkLog($data);
 
+		$i = 0;
 		if(self::$MODE == 1 || self::$MODE == 2)
 		{
 			// cookies larger than 4kB can break
 			$bits = str_split($encdata, 2000);
-			$i = 0;
 			foreach($bits as $bite)
 			{
-				setcookie('fortephplog'.$i,$bite,time()+3600,'/');
+				Cookie::send_cookie('fortephplog'.$i,$bite,time()+3600,'/',null,Cookie::is_ssl(),false);
 				$i++;
 			}
 		}
+
+		// in case cookie mode was used, prevent previous log from persisting
+		while(isset($_COOKIE['fortephplog'.$i]))
+		{
+			Cookie::send_cookie('fortephplog'.$i,'',time()-28400,'/');
+			$i++;
+		}
+
 		if(self::$MODE == 1 || self::$MODE == 3)
 		{
 			// Not sure if Chrome Logger allows chunking of header
