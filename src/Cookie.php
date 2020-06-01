@@ -6,9 +6,6 @@ namespace FrankForte\QuantumPHP;
  * Class to set cookies with SameSite attribute, even in PHP < 7.3
  * Copyright 2020 Frank Forte
  *
- * Adapted from Symfony/Component/HttpFoundation/Cookie.php
- * See the LICENCE file distributed with this file.
- *
  * @package QuantumPHP
  * @author Frank Forte <frank.forte@gmail.com>
  */
@@ -80,10 +77,11 @@ class Cookie
 			$c['path'] = '/';
 		}
 
-		if(!isset($c['domain']) && isset($_SERVER['HTTP_HOST'])) {
-			$c['domain'] = $_SERVER['HTTP_HOST'];
+		if(!isset($c['domain'])) {
+			$c['domain'] = '';
 		}
 
+		// default to secure if available, in case developers send back something sensitive.
 		if(!isset($c['secure'])) {
 			$c['secure'] = static::is_ssl();
 		}
@@ -105,52 +103,12 @@ class Cookie
 		// hack for PHP before 7.3 to get SameSite working
 		if (PHP_VERSION_ID < 70300) {
 
-			$reservedCharsFrom = ['=', ',', ';', ' ', "\t", "\r", "\n", "\v", "\f"];
-			$reservedCharsTo = ['%3D', '%2C', '%3B', '%20', '%09', '%0D', '%0A', '%0B', '%0C'];
-
-
-            $str = str_replace($reservedCharsFrom, $reservedCharsTo, $c['name']);
-			$str .= '=';
-
-			if ('' === (string) $c['value']) {
-				$str .= 'deleted; expires='.gmdate('D, d-M-Y H:i:s T', time() - 31536001).'; Max-Age=0';
-			} else {
-				$str .= rawurlencode($c['value']);
-
-				$maxAge = $c['expires'] - time();
-				if($maxAge < 0) {
-					$maxAge = 0;
-				}
-
-				if (0 !== $c['expires']) {
-
-					$str .= '; expires='.gmdate('D, d-M-Y H:i:s T', $c['expires']).'; Max-Age='.$maxAge;
-				}
-			}
-
-            $str .= '; path='.(empty($c['path']) ? '/' : $c['path']);
-
-			if($c['domain'])
-			{
-				$str .= '; domain='.$c['domain'];
-			}
-
-			if($c['secure'])
-			{
-				 $str .= '; secure';
-			}
-
-			if($c['httponly'])
-			{
-				 $str .= '; httponly';
-			}
-
-			$str .= '; samesite='.$c['samesite'];
-
-			return $str;
+			// hack that will stop working in PHP 7.3
+			$set = setcookie($c['name'], $c['value'], $c['expires'], $c['path'].'; samesite='.$c['samesite'], $c['domain'], $c['secure'], $c['httponly']);
 
 		} else {
 
+			// hack that will stop working in PHP 7.3
 			$set = setcookie($c['name'], $c['value'], [
 				'expires' => $c['expires'],
 				'path' => '/',
@@ -159,11 +117,11 @@ class Cookie
 				'secure' => $c['secure'],
 				'httponly' => $c['httponly']
 			]);
+		}
 
-			if(false === $set )
-			{
-				// unable to send cookie
-			}
+		if(false === $set )
+		{
+			// unable to send cookie
 		}
 	}
 }
