@@ -89,7 +89,7 @@ class Cookie
 		}
 
 		if(!isset($c['httponly'])) {
-			$c['httponly'] = true;
+			$c['httponly'] = false;
 		}
 
 		// Make sure SameSite is set
