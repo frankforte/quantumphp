@@ -71,6 +71,8 @@ ffQuantumPhp.cookie_log = function(){
 
 			/* clear cookie to prevent repeat logs */
 			document.cookie = "fortephplog"+i+"=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+			/* Must remove cookie with exact same parameters used to add cookie */
+			document.cookie = "fortephplog"+i+"=; path=/; domain="+window.location.host+";expires=Thu, 01 Jan 1970 00:00:01 GMT;";
 		}
 		i++;
 	} while (bite);
