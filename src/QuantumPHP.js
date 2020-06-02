@@ -64,16 +64,17 @@ ffQuantumPhp.cookie_log = function(){
 	/* get logs from gookie, one bite at a time */
 	var log = "";
 	var i = 0;
+	var samesite = window.location.protocol == "https:" ? "None" : "Lax";
 	do{
 		var bite = ffQuantumPhp.getcookie('fortephplog'+i);
 		if(bite != null){
 			log = log+bite;
 
 			/* clear cookie to prevent repeat logs */
-			document.cookie = "fortephplog"+i+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/;";
+			document.cookie = "fortephplog"+i+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/; SameSite="+samesite;
 			/* Must remove cookie with exact same parameters used to add cookie */
-			document.cookie = "fortephplog"+i+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/; domain="+window.location.host+";";
-			document.cookie = "fortephplog"+i+"=; expires=Thu, 01 Jan 1970 23:00:00 UTC; path=/; domain=."+window.location.host+";";
+			document.cookie = "fortephplog"+i+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/; domain="+window.location.host+"; SameSite="+samesite;
+			document.cookie = "fortephplog"+i+"=; expires=Thu, 01 Jan 1970 23:00:00 UTC; path=/; domain=."+window.location.host+"; SameSite="+samesite;
 		}
 		i++;
 	} while (bite);
