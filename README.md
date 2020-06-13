@@ -32,6 +32,8 @@ https://chrome.google.com/extensions/detail/noaneddfkdjfnfdakjjmocngnfkfehhd
 More information can be found here:
 http://www.chromelogger.com
 
+NOTE:  Do not forget to turn on Chrome Logger for each website that you debug. There is a little icone that looks like a console window near the top right, just besite the address bar.
+
 or
 
 #### c) copy the JavaScript file into your public directory and include it in your HTML.
@@ -117,9 +119,19 @@ QuantumPHP::send();
 
 Finally, hit F12 in your browser to open developer tools, and view the output under the "console" tab.
 
+## Security Tip
+
+You should never add sensitive data to the logs, or at the very least, you should check that you are in development before sending debug information to the browser, for example:
+
+```php
+<?php
+if($_SERVER['HTTP_HOST'] == 'localhost') {
+	QuantumPHP::send();
+}
+```
 
 ## Known bug
 
 If you have multiple tabs open in Firefox with the developer tools console open, the log will sometimes appear on one of the other tabs. Closing those tabs or the console on those tabs appears to prevent the issue.
 
-Please submit any issues you have: https://github.com/frankforte/quantumphp/issues
+If you have any issues, please double check that you did not miss anything above.  You can submit the details of your issue here: https://github.com/frankforte/quantumphp/issues
