@@ -32,7 +32,7 @@ https://chrome.google.com/extensions/detail/noaneddfkdjfnfdakjjmocngnfkfehhd
 More information can be found here:
 http://www.chromelogger.com
 
-NOTE:  Do not forget to turn on Chrome Logger for each website that you debug. There is a little icone that looks like a console window near the top right, just besite the address bar.
+NOTE:  Do not forget to turn on Chrome Logger for each website that you debug. There is a little icon that looks like a console window near the top right, just beside the address bar.
 
 or
 
@@ -66,6 +66,10 @@ Use the logger
     $logger->addInfo('Log Message', $test_data);
     $logger->warning('Some warning');
     $logger->critical('Someething Bad');
+    $logger->table([
+		['one'=>'a', 'two'=>'b', 'three'=>'c'],
+		['one'=>'aa','two'=>'bb','three'=>'cc']
+	]);
 
 
 #### Without Monolog or in other PHP projects or frameworks
@@ -105,7 +109,7 @@ QuantumPHP::error('Regular error');
 QuantumPHP::add('Hello console table!');
 QuantumPHP::add('Something Bad','error');
 QuantumPHP::add('Something Really Bad','critical');
-// QuantumPHP::log($_SERVER); // you will need mode 0 for this!
+// QuantumPHP::add($_SERVER); // you will need mode 0 for this!
 try
 {
 	throw new Exception('Something Bad!!');
@@ -114,10 +118,35 @@ catch(Exception $e)
 {
 	\QuantumPHP::add('test','warning',$e);
 }
+
+// Logging data in a table
+// objects can be expanded in Firefox console table, but not Chrome:
+$obj = new stdClass();
+$obj->name = 'test class';
+$obj->items = [1,2,3];
+$lines = [];
+
+$lines[] = [
+	 'Time' =>round(microtime(true),8)
+	,'Level' => 'status'
+	,'Comment' => $obj // Chrome just shows {...}
+	,'Function' => debug_backtrace()[0]['function']
+	,'File' => __LINE__.' - '.__FILE__
+];
+$lines[] = [
+	 'Time' =>round(microtime(true),8)
+	,'Level' => 'status'
+	,'Comment' => 'Strings are ok in Chrome'
+	,'Function' => debug_backtrace()[0]['function']
+	,'File' => __LINE__.' - '.__FILE__
+];
+
+QuantumPHP::table($lines);
+
 QuantumPHP::send();
 ```
 
-Finally, hit F12 in your browser to open developer tools, and view the output under the "console" tab.
+Finally, hit F12 in your browser to open developer tools, and view the output under the "console" tab. If you are using Chrome, don't forget to turn on Chrome Logger by clicking the icon beside the address bar that looks like a command line window.
 
 ## Security Tip
 
