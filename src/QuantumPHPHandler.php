@@ -659,7 +659,7 @@ class QuantumPHPHandler extends AbstractProcessingHandler
      */
     protected function _encode($data)
     {
-        return base64_encode(utf8_encode(json_encode((object)$data)));
+        return base64_encode(json_encode((object)$data));
     }
 
     /**
@@ -701,6 +701,18 @@ class QuantumPHPHandler extends AbstractProcessingHandler
         return $this->_settings[$key];
     }
 
+    /**
+     * Add debug message
+     *
+     * @param mixed $comment
+     * @param string $level
+     * @param object|boolean $exceptionObj
+     * @param boolean $time
+     * @param boolean $file
+     * @param boolean $line
+     * @param boolean $function
+     * @return void
+     */
 	public static function add($comment, $level = 'status', $exceptionObj = false, $time = false, $file = false, $line = false, $function = false)
 	{
 
