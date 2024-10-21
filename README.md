@@ -83,6 +83,9 @@ Note: objects and arrays should be logged with the "add" method: `QuantumPHP::a
 // Optional if you do not have an autoloader
 include 'QuantumPHP.php';
 
+// alternatively, using a class autoloader:
+// use FrankForte\QuantumPHP\QuantumPHP;
+
 /**
  * Optional debugging mode
  * mode = 1 for Chrome and Firefox
