@@ -4,7 +4,7 @@ namespace FrankForte\QuantumPHP;
 
 /**
  * FrankForte\QuantumPHP\Cookie
- * Class to set cookies with SameSite attribute, even in PHP < 7.3
+ * Class to set cookies with SameSite attribute
  * Copyright 2020-2024 Frank Forte
  *
  * @package QuantumPHP
