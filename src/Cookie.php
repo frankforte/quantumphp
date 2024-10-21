@@ -98,24 +98,17 @@ class Cookie
         }
 
         if ($c['samesite'] == 'none' && !$c['secure']) {
-            // These cookies will be rejected by some browsers in the future
+            // These cookies will be rejected by some browsers
         }
 
-        // hack for PHP before 7.3 to get SameSite working
-        if (PHP_VERSION_ID < 70300) {
-            // hack that will stop working in PHP 7.3
-            $set = setcookie($c['name'], $c['value'], $c['expires'], $c['path'] . '; samesite=' . $c['samesite'], $c['domain'], $c['secure'], $c['httponly']);
-        } else {
-            // hack that will stop working in PHP 7.3
-            $set = setcookie($c['name'], $c['value'], [
-                'expires' => $c['expires'],
-                'path' => '/',
-                'domain' => $c['domain'],
-                'samesite' => $c['samesite'],
-                'secure' => $c['secure'],
-                'httponly' => $c['httponly']
-            ]);
-        }
+		$set = setcookie($c['name'], $c['value'], [
+			'expires' => $c['expires'],
+			'path' => '/',
+			'domain' => $c['domain'],
+			'samesite' => $c['samesite'],
+			'secure' => $c['secure'],
+			'httponly' => $c['httponly']
+		]);
 
         if (false === $set) {
             // unable to send cookie
