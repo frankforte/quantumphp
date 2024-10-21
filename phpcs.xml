@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<ruleset name="QuantumPhpStandard">
+    <description>PSR12 with QuantumPHP preferences.</description>
+
+    <!-- Code MUST follow all rules outlined in PSR-1. -->
+    <rule ref="PSR12"/>
+
+	<exclude-pattern type="relative-root">docs/*</exclude-pattern>
+
+    <!-- There MUST NOT be a hard limit on line length.
+    The soft limit on line length MUST be 120 characters.
+    Lines SHOULD NOT be longer than 80 characters; lines longer than that SHOULD be split into multiple subsequent lines of no more than 80 characters each. -->
+    <rule ref="Generic.Files.LineLength">
+        <properties>
+            <property name="lineLimit" value="120"/>
+            <property name="absoluteLineLimit" value="0"/>
+
+            <!-- QuantumPHP Rule-->
+            <type>notice</type>
+        </properties>
+    </rule>
+</ruleset>

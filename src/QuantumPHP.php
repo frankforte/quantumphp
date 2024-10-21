@@ -1,6 +1,9 @@
 <?php
+
+namespace FrankForte\QuantumPHP;
+
 /**
- * Copyright 2017 Frank Forte
+ * Copyright 2017-2024 Frank Forte
  *
  * This is a derivative work of ccampbell/chromephp by Craig Campbell
  * Copyright 2010-2013 Craig Campbell
@@ -17,6 +20,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 /**
  * Server Side Firefox 57+ (Quantum) PHP debugger class
  *
@@ -25,13 +29,14 @@
  * @author Craig Campbell <iamcraigcampbell@gmail.com>
  */
 use FrankForte\QuantumPHP\Cookie;
+use Exception;
 
 class QuantumPHP
 {
     /**
      * @var string
      */
-    const VERSION = '1.1.11';
+    const VERSION = '1.2.1';
 
     /**
      * @var string
@@ -40,24 +45,24 @@ class QuantumPHP
 
     /**
      * @var int
-	 * The total size of all response headers including this serialized server log
-	 * should be less than the Apache LimitRequestFieldSize Directive
+     * The total size of all response headers including this serialized server log
+     * should be less than the Apache LimitRequestFieldSize Directive
      */
     public static $HEADER_LIMIT = 5000;
 
-	/**
-	 * @var string
-	 * whether to send the log as a cookie or a HTTP header
-	 * valid values are 0 for HTML, 1 for cookie and header, 2 for cookie only, 3 for header only
-	 */
-	public static $MODE = 2;
+    /**
+     * @var string
+     * whether to send the log as a cookie or a HTTP header
+     * valid values are 0 for HTML, 1 for cookie and header, 2 for cookie only, 3 for header only
+     */
+    public static $MODE = 2;
 
 
-	/**
-	 * @var string
-	 * most critical level that occured
-	 */
-	public static $LEVEL = 'info';
+    /**
+     * @var string
+     * most critical level that occured
+     */
+    public static $LEVEL = 'info';
 
     /**
      * @var string
@@ -89,10 +94,10 @@ class QuantumPHP
      */
     const INFO = 'info';
 
-	/**
-	 * @var array
-	 */
-	 private static $statuses = ['status','critical','failure','error','warning','success','notice','info'];
+    /**
+     * @var array
+     */
+    private static $statuses = ['status','critical','failure','error','warning','success','notice','info'];
 
     /**
      * @var string
@@ -174,7 +179,7 @@ class QuantumPHP
      */
     private function __construct()
     {
-		$this->_start_time = microtime(true);
+        $this->_start_time = microtime(true);
         $this->_php_version = phpversion();
         $this->_timestamp = $this->_php_version >= 5.1 ? $_SERVER['REQUEST_TIME'] : time();
         $this->_json['request_uri'] = $_SERVER['REQUEST_URI'];
@@ -343,7 +348,6 @@ class QuantumPHP
         // loop through object vars
         $object_vars = get_object_vars($object);
         foreach ($object_vars as $key => $value) {
-
             // same instance as parent object
             if ($value === $object || in_array($value, $this->_processed, true)) {
                 $value = 'recursion - parent object [' . get_class($value) . ']';
@@ -355,7 +359,6 @@ class QuantumPHP
 
         // loop through the properties and add those
         foreach ($reflection->getProperties() as $property) {
-
             // if one of these properties was already added above then ignore it
             if (array_key_exists($property->getName(), $object_vars)) {
                 continue;
@@ -429,188 +432,169 @@ class QuantumPHP
 
         $row = [$logs, $backtrace, $type];
 
-		if( !$prepend ){
-			$this->_json['rows'][] = $row;
-		} else {
-			array_unshift($this->_json['rows'], $row);
-		}
+        if (!$prepend) {
+            $this->_json['rows'][] = $row;
+        } else {
+            array_unshift($this->_json['rows'], $row);
+        }
     }
 
-	/**
+    /**
      * Sends debug logs to the browser
      *
      * @var mixed
      * @return void
      */
-	protected function _writeLogs($data)
-	{
-		if(self::$MODE == 0)
-		{
-			echo '<!-- fortephplog '.$this->_encode($data).' -->';
-			return;
-		}
-
-		$encdata = $this->_shrinkLog($data);
-
-		$i = 0;
-		if(self::$MODE == 1 || self::$MODE == 2)
-		{
-			// cookies larger than 4kB can break
-			$bits = str_split($encdata, 2000);
-			foreach($bits as $bite)
-			{
-				Cookie::send_cookie('fortephplog'.$i,$bite,time()+3600,'/',null,Cookie::is_ssl(),false);
-				$i++;
-			}
-		}
-
-		// in case cookie mode was used, prevent previous log from persisting
-		while(isset($_COOKIE['fortephplog'.$i]))
-		{
-			Cookie::send_cookie('fortephplog'.$i,'',time()-28400,'/');
-			$i++;
-		}
-
-		if(self::$MODE == 1 || self::$MODE == 3)
-		{
-			// Not sure if Chrome Logger allows chunking of header
-			// If so, we can update this to match chunked cookies above
-			header(self::HEADER_NAME . ': ' . $encdata);
-		}
-	}
-
-	/**
-	 * checks if headers will be too large. If so, it
-	 * will remove notices first, then other types until
-	 * the header will be small enough.
-	 * @author Frank Forte <frank.forte@gmail.com>
-	 * @var array
-	 * @return string
-	 */
-	protected function _shrinkLog($data)
+    protected function _writeLogs($data)
     {
-		$encdata = $this->_encode($data);
+        if (self::$MODE == 0) {
+            echo '<!-- fortephplog ' . $this->_encode($data) . ' -->';
+            return;
+        }
 
-		if(strlen($encdata) > self::$HEADER_LIMIT)
-		{
-			array_unshift($data['rows'],[['!! WARNING !!! Headers too large, log truncated to prevent Apache 500 Server Error.'], 'QuantumPHP: '.__LINE__, self::ERROR]);
-		}
+        $encdata = $this->_shrinkLog($data);
 
-		/*
-		If we want to check the entire header size, use this for good estimate:
-		$cur = headers_list();
-		$cur = json_encode($cur);
-		$cursize = strlen($cur);
-		*/
-		while(strlen($encdata) > self::$HEADER_LIMIT)
-		{
-			$shrinking = false;
+        $i = 0;
+        if (self::$MODE == 1 || self::$MODE == 2) {
+            // cookies larger than 4kB can break
+            $bits = str_split($encdata, 2000);
+            foreach ($bits as $bite) {
+                Cookie::send_cookie('fortephplog' . $i, $bite, time() + 3600, '/', null, Cookie::is_ssl(), false);
+                $i++;
+            }
+        }
 
-			// first remove regular status messages from tables from start to finish
-			// try to leave behind warnings, errors
-			foreach($data['rows'] as $j => $row)
-			{
-				if(isset($row[2]) && $row[2] === 'table')
-				{
-					foreach($row[0] as $k => $ro)
-					{
-						$len = sizeof($ro) -1;
+        // in case cookie mode was used, prevent previous log from persisting
+        while (isset($_COOKIE['fortephplog' . $i])) {
+            Cookie::send_cookie('fortephplog' . $i, '', time() - 28400, '/');
+            $i++;
+        }
 
-						// $ro is array of messages in the table
-						// loop through them from end to start
-						for($i = $len; $i >=0; $i --)
-						{
+        if (self::$MODE == 1 || self::$MODE == 3) {
+            // Not sure if Chrome Logger allows chunking of header
+            // If so, we can update this to match chunked cookies above
+            header(self::HEADER_NAME . ': ' . $encdata);
+        }
+    }
 
-							if(isset($data['rows'][$j][0][$k][$i]['Level'])
-								&& $data['rows'][$j][0][$k][$i]['Level'] == 'status')
-							{
-								// remove this message
-								unset($data['rows'][$j][0][$k][$i]);
-								$shrinking = true;
-								break 3;
-							}
+    /**
+     * checks if headers will be too large. If so, it
+     * will remove notices first, then other types until
+     * the header will be small enough.
+     * @author Frank Forte <frank.forte@gmail.com>
+     * @var array
+     * @return string
+     */
+    protected function _shrinkLog($data)
+    {
+        $encdata = $this->_encode($data);
 
-							// old array structure
-							elseif(isset($data['rows'][$j][0][$k][$i][3])
-								&& $data['rows'][$j][0][$k][$i][3] == 'status')
-							{
-								// remove this message
-								unset($data['rows'][$j][0][$k][$i]);
-								$shrinking = true;
-								break 3;
-							}
-						}
-						// still not shrinking?  remove everything but errors
-						for($i = $len; $i >=0; $i --)
-						{
+        if (strlen($encdata) > self::$HEADER_LIMIT) {
+            array_unshift($data['rows'], [['!! WARNING !!! Headers too large, log truncated to prevent Apache 500 Server Error.'], 'QuantumPHP: ' . __LINE__, self::ERROR]);
+        }
 
-							if(isset($data['rows'][$j][0][$k][$i]['Level'])
-								&& $data['rows'][$j][0][$k][$i]['Level'] != 'error')
-							{
-								// remove this message
-								unset($data['rows'][$j][0][$k][$i]);
-								$shrinking = true;
-								break 3;
-							}
+        /*
+        If we want to check the entire header size, use this for good estimate:
+        $cur = headers_list();
+        $cur = json_encode($cur);
+        $cursize = strlen($cur);
+        */
+        while (strlen($encdata) > self::$HEADER_LIMIT) {
+            $shrinking = false;
 
-							// old array structure
-							elseif(isset($data['rows'][$j][0][$k][$i][3])
-								&& $data['rows'][$j][0][$k][$i][3] != 'error')
-							{
-								// remove this message
-								unset($data['rows'][$j][0][$k][$i]);
-								$shrinking = true;
-								break 3;
-							}
-						}
-					}
-				}
-			}
+            // first remove regular status messages from tables from start to finish
+            // try to leave behind warnings, errors
+            foreach ($data['rows'] as $j => $row) {
+                if (isset($row[2]) && $row[2] === 'table') {
+                    foreach ($row[0] as $k => $ro) {
+                        $len = sizeof($ro) - 1;
 
-			// only errors left in the tables, or no tables to shrink
-			// lets remove regular logs
-			if(!$shrinking)
-			{
-				foreach($data['rows'] as $j => $row)
-				{
-					if(isset($row[$j][2]) && in_array($row[$j][2],self::$statuses))
-					{
-						if($row[$j][2] !== 'error')
-						{
-							unset($data['rows'][$j]);
-							$shrinking = true;
-							break;
-						}
-					}
-				}
+                        // $ro is array of messages in the table
+                        // loop through them from end to start
+                        for ($i = $len; $i >= 0; $i--) {
+                            if (
+                                isset($data['rows'][$j][0][$k][$i]['Level'])
+                                && $data['rows'][$j][0][$k][$i]['Level'] == 'status'
+                            ) {
+                                // remove this message
+                                unset($data['rows'][$j][0][$k][$i]);
+                                $shrinking = true;
+                                break 3;
+                            }
 
-			}
+                            // old array structure
+                            elseif (
+                                isset($data['rows'][$j][0][$k][$i][3])
+                                && $data['rows'][$j][0][$k][$i][3] == 'status'
+                            ) {
+                                // remove this message
+                                unset($data['rows'][$j][0][$k][$i]);
+                                $shrinking = true;
+                                break 3;
+                            }
+                        }
+                        // still not shrinking?  remove everything but errors
+                        for ($i = $len; $i >= 0; $i--) {
+                            if (
+                                isset($data['rows'][$j][0][$k][$i]['Level'])
+                                && $data['rows'][$j][0][$k][$i]['Level'] != 'error'
+                            ) {
+                                // remove this message
+                                unset($data['rows'][$j][0][$k][$i]);
+                                $shrinking = true;
+                                break 3;
+                            }
 
-			// ok now remove some errors in the table
-			foreach($data['rows'] as $j => $row)
-			{
-				if(isset($row[2]) && $row[2] === 'table')
-				{
-					foreach($row[0] as $k => $ro)
-					{
-						array_pop($data['rows'][$j][0][$k]);
-						$shrinking = true;
-						break 2;
-					}
-				}
-			}
+                            // old array structure
+                            elseif (
+                                isset($data['rows'][$j][0][$k][$i][3])
+                                && $data['rows'][$j][0][$k][$i][3] != 'error'
+                            ) {
+                                // remove this message
+                                unset($data['rows'][$j][0][$k][$i]);
+                                $shrinking = true;
+                                break 3;
+                            }
+                        }
+                    }
+                }
+            }
 
-			// last resort - remove each debug entry until we are small enough or empty
-			if(!$shrinking)
-			{
-				array_pop($data['rows']);
-			}
+            // only errors left in the tables, or no tables to shrink
+            // lets remove regular logs
+            if (!$shrinking) {
+                foreach ($data['rows'] as $j => $row) {
+                    if (isset($row[$j][2]) && in_array($row[$j][2], self::$statuses)) {
+                        if ($row[$j][2] !== 'error') {
+                            unset($data['rows'][$j]);
+                            $shrinking = true;
+                            break;
+                        }
+                    }
+                }
+            }
 
-			$encdata = $this->_encode($data);
-		}
+            // ok now remove some errors in the table
+            foreach ($data['rows'] as $j => $row) {
+                if (isset($row[2]) && $row[2] === 'table') {
+                    foreach ($row[0] as $k => $ro) {
+                        array_pop($data['rows'][$j][0][$k]);
+                        $shrinking = true;
+                        break 2;
+                    }
+                }
+            }
 
-		return $encdata;
-	}
+            // last resort - remove each debug entry until we are small enough or empty
+            if (!$shrinking) {
+                array_pop($data['rows']);
+            }
+
+            $encdata = $this->_encode($data);
+        }
+
+        return $encdata;
+    }
 
     /**
      * encodes the data to be sent along with the request
@@ -674,116 +658,100 @@ class QuantumPHP
      * @param boolean $function
      * @return void
      */
-	public static function add($comment, $level = 'status', $exceptionObj = false, $time = false, $file = false, $line = false, $function = false)
-	{
+    public static function add($comment, $level = 'status', $exceptionObj = false, $time = false, $file = false, $line = false, $function = false)
+    {
 
-		if(!in_array($level,self::$statuses))
-		{
-			throw new Exception('Debug status is not valid: '.print_r($level,true));
-		}
+        if (!in_array($level, self::$statuses)) {
+            throw new Exception('Debug status is not valid: ' . print_r($level, true));
+        }
 
-		$backtrace = debug_backtrace();
-		$file = $file !== false ? $file : $backtrace[0]['file'];
-		$line = $line !== false ? $line : $backtrace[0]['line'];
+        $backtrace = debug_backtrace();
+        $file = $file !== false ? $file : $backtrace[0]['file'];
+        $line = $line !== false ? $line : $backtrace[0]['line'];
 
-		if($function === false)
-		{
-			if(isset($backtrace[1]['function']))
-			{
-				$function = $backtrace[1]['function'];
+        if ($function === false) {
+            if (isset($backtrace[1]['function'])) {
+                $function = $backtrace[1]['function'];
 
-				if(isset($backtrace[1]['object']))
-				{
-					if(method_exists($backtrace[1]['object'],'__tostring'))
-					{
-						$function = $backtrace[1]['object'].$backtrace[1]['type'].$function;
-					}
-					else
-					{
-						$function = get_class($backtrace[1]['object']).$backtrace[1]['type'].$function;
-					}
-				}
-				elseif(isset($backtrace[1]['class']))
-				{
-					$function = $backtrace[1]['class'].$backtrace[1]['type'].$function;
-				}
+                if (isset($backtrace[1]['object'])) {
+                    if (method_exists($backtrace[1]['object'], '__tostring')) {
+                        $function = $backtrace[1]['object'] . $backtrace[1]['type'] . $function;
+                    } else {
+                        $function = get_class($backtrace[1]['object']) . $backtrace[1]['type'] . $function;
+                    }
+                } elseif (isset($backtrace[1]['class'])) {
+                    $function = $backtrace[1]['class'] . $backtrace[1]['type'] . $function;
+                }
 
-				$function .= '()';
-			}
-			else
-			{
-				$function = '';
-			}
-		}
+                $function .= '()';
+            } else {
+                $function = '';
+            }
+        }
 
-		$logger = self::getInstance();
+        $logger = self::getInstance();
 
-		$entry['Time'] = $time ? $time : microtime(true) - $logger->_start_time;
-		$entry['Level'] = $level;
-		$entry['Comment'] = $comment;
-		$entry['Function'] = $function;
-		$entry['File'] = $file;
-		$entry['Line'] = $line;
-		$entry['Exception'] = !$exceptionObj ? null : [
-			 'message' => $exceptionObj->getMessage()
-			,'file' => $exceptionObj->getFile()
-			,'line' => $exceptionObj->getLine()
-			,'trace' => $exceptionObj->getTrace()
-		];
+        $entry['Time'] = $time ? $time : microtime(true) - $logger->_start_time;
+        $entry['Level'] = $level;
+        $entry['Comment'] = $comment;
+        $entry['Function'] = $function;
+        $entry['File'] = $file;
+        $entry['Line'] = $line;
+        $entry['Exception'] = !$exceptionObj ? null : [
+             'message' => $exceptionObj->getMessage()
+            ,'file' => $exceptionObj->getFile()
+            ,'line' => $exceptionObj->getLine()
+            ,'trace' => $exceptionObj->getTrace()
+        ];
 
-		$logger->_debug_list[] = $entry;
-	}
+        $logger->_debug_list[] = $entry;
+    }
 
-	/**
-	* output http headers for FirePHP add-on
-	*/
-	public static function send()
-	{
-		if( headers_sent())
-		{
-			return;
-		}
+    /**
+    * output http headers for FirePHP add-on
+    */
+    public static function send()
+    {
+        if (static::$MODE != 0 && headers_sent()) {
+            return;
+        }
 
-		$level_count = [];
-		foreach(self::$statuses as $s){
-			$level_count[$s] = 0;
-		}
+        $level_count = [];
+        foreach (self::$statuses as $s) {
+            $level_count[$s] = 0;
+        }
 
-		$logger = self::getInstance();
-		if(!empty($logger->_debug_list))
-		{
-			foreach($logger->_debug_list as $entry)
-			{
-				if($entry['Level'] != 'status')
-				{
-					$level_count[$entry['Level']]++;
-				}
-			}
-		}
+        $logger = self::getInstance();
+        if (!empty($logger->_debug_list)) {
+            foreach ($logger->_debug_list as $entry) {
+                if ($entry['Level'] != 'status') {
+                    $level_count[$entry['Level']]++;
+                }
+            }
+        }
 
-		$table_header = "QuantumPHP ".self::VERSION.': '.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'].' ';
-		foreach($level_count as $level=>$num)
-		{
-			if($num > 0)
-			{
-				if($num == 1) { $s = ''; } else { $s = 's'; }
-				$table_header .= ' ('.$num.' '.$level.' message'.$s.')';
-			}
-		}
+        $table_header = "QuantumPHP " . self::VERSION . ': ' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'] . ' ';
+        foreach ($level_count as $level => $num) {
+            if ($num > 0) {
+                if ($num == 1) {
+                    $s = '';
+                } else {
+                    $s = 's';
+                }
+                $table_header .= ' (' . $num . ' ' . $level . ' message' . $s . ')';
+            }
+        }
 
-		$logger::_log('info', [$table_header.' Peak Memory Usage '.round(memory_get_peak_usage() / (1024 * 1024),2).'MB '], true);
+        $logger::_log('info', [$table_header . ' Peak Memory Usage ' . round(memory_get_peak_usage() / (1024 * 1024), 2) . 'MB '], true);
 
-		if(!empty($logger->_debug_list))
-		{
-			self::table($logger->_debug_list);
-		}
+        if (!empty($logger->_debug_list)) {
+            self::table($logger->_debug_list);
+        }
 
-		// send server logs to browser
-		$logger->_writeLogs($logger->_json);
+        // send server logs to browser
+        $logger->_writeLogs($logger->_json);
 
-		// prevent re-sending logs
-		$logger->_debug_list = [];
-
-	}
-
+        // prevent re-sending logs
+        $logger->_debug_list = [];
+    }
 }
