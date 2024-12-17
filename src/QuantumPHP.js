@@ -64,17 +64,18 @@ ffQuantumPhp.cookie_log = function(){
 	/* get logs from gookie, one bite at a time */
 	var log = "";
 	var i = 0;
+	var secureAttr = window.location.protocol == "https:" ? ';secure' : '';
 	var samesite = window.location.protocol == "https:" ? "None" : "Lax";
 	do{
-		var bite = ffQuantumPhp.getcookie('fortephplog'+i);
+		var bite = ffQuantumPhp.getcookie('fortephplog' + i);
 		if(bite != null){
 			log = log+bite;
 
 			/* clear cookie to prevent repeat logs */
-			document.cookie = "fortephplog"+i+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/; SameSite="+samesite;
+			document.cookie = "fortephplog" + i + "=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/; SameSite=" + samesite + secureAttr;
 			/* Must remove cookie with exact same parameters used to add cookie */
-			document.cookie = "fortephplog"+i+"=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/; domain="+window.location.host+"; SameSite="+samesite;
-			document.cookie = "fortephplog"+i+"=; expires=Thu, 01 Jan 1970 23:00:00 UTC; path=/; domain=."+window.location.host+"; SameSite="+samesite;
+			document.cookie = "fortephplog" + i + "=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/; domain=" + window.location.host + "; SameSite=" + samesite + secureAttr;
+			document.cookie = "fortephplog" + i + "=; expires=Thu, 01 Jan 1970 23:00:00 UTC; path=/; domain=." + window.location.host + "; SameSite=" + samesite + secureAttr;
 		}
 		i++;
 	} while (bite);
@@ -109,9 +110,9 @@ ffQuantumPhp.comment_log = function(){
 ffQuantumPhp.log_exception = function(e){
 	var s = "";
 	if(e.fileName){ s += e.fileName;}
-	if(e.lineNumber){ s += " line "+e.lineNumber;}
-	if(e.columnNumber){ s += " col "+e.columnNumber;}
-	if(e.message){ s += " "+e.message;}
+	if(e.lineNumber){ s += " line " + e.lineNumber;}
+	if(e.columnNumber){ s += " col " + e.columnNumber;}
+	if(e.message){ s += " " + e.message;}
 	console.warn(s);
 }
 
@@ -131,9 +132,9 @@ ffQuantumPhp.show_console = function(log){
 				} else {
 					for(var j in log["rows"][i][0]){
 						if(typeof console[ log["rows"][i][2] ] != "undefined" ){
-							console[log["rows"][i][2]](log["rows"][i][0][j] + " [" +log["rows"][i][1]+"]");
+							console[log["rows"][i][2]](log["rows"][i][0][j] + " [" + log["rows"][i][1] + "]");
 						} else {
-							console.log(log["rows"][i][0]+" ["+log["rows"][i][1]+"]");
+							console.log(log["rows"][i][0] + " [" + log["rows"][i][1] + "]");
 						}
 					}
 
