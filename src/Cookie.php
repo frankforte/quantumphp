@@ -94,7 +94,7 @@ class Cookie
         // Make sure SameSite is set
         // CORS cookies requires secure and samesite=none
         if (!isset($c['samesite']) || empty($c['samesite'])) {
-            $c['samesite'] = 'Strict';
+            $c['samesite'] = 'lax';
         }
 
         if ($c['samesite'] == 'none' && !$c['secure']) {
