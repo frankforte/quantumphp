@@ -32,6 +32,7 @@ use Monolog\Logger;
  * @author  Craig Campbell <iamcraigcampbell@gmail.com>
  */
 use FrankForte\QuantumPHP\Cookie;
+use Exception;
 
 class QuantumPHPHandler extends AbstractProcessingHandler
 {
@@ -55,7 +56,7 @@ class QuantumPHPHandler extends AbstractProcessingHandler
     /**
      * @var string
      * whether to send the log as a cookie or a HTTP header
-     * valid values are 1 for all, 2 for cookie only, 3 for header only
+     * valid values are 0 for HTML, 1 for cookie and header, 2 for cookie only, 3 for header only
      */
     public static $MODE = 2;
 
@@ -132,10 +133,9 @@ class QuantumPHPHandler extends AbstractProcessingHandler
     protected $_start_time;
 
     /**
-     * @var int
+     * @var array
      */
     protected $_debug_list;
-
 
     /**
      * @var array
@@ -175,14 +175,12 @@ class QuantumPHPHandler extends AbstractProcessingHandler
      */
     protected $_processed = [];
 
-
     /**
      * Whether we started sending logs into to the HTTP headers
      *
      * @var array
      */
     protected static $_started = false;
-
 
     /**
      * constructor
@@ -482,13 +480,6 @@ class QuantumPHPHandler extends AbstractProcessingHandler
      */
     protected function _writeLogs($data)
     {
-        // in case cookie mode was used, prevent previous log from persisting
-        $i = 0;
-        while (isset($_COOKIE['fortephplog' . $i])) {
-            Cookie::send_cookie('fortephplog' . $i, '', time() - 28400, '/');
-            $i++;
-        }
-
         if (self::$MODE == 0) {
             echo '<!-- fortephplog ' . $this->_encode($data) . ' -->';
             return;
@@ -496,15 +487,22 @@ class QuantumPHPHandler extends AbstractProcessingHandler
 
         $encdata = $this->_shrinkLog($data);
 
+        $i = 0;
         if (self::$MODE == 1 || self::$MODE == 2) {
             // cookies larger than 4kB can break
             $bits = str_split($encdata, 2000);
-            $i = 0;
             foreach ($bits as $bite) {
-                Cookie::send_cookie('fortephplog' . $i, $bite, time() + 3600, '/');
+                Cookie::send_cookie('fortephplog' . $i, $bite, time() + 3600, '/', null, Cookie::is_ssl(), false);
                 $i++;
             }
         }
+
+        // in case cookie mode was used, prevent previous log from persisting
+        while (isset($_COOKIE['fortephplog' . $i])) {
+            Cookie::send_cookie('fortephplog' . $i, '', time() - 28400, '/');
+            $i++;
+        }
+
         if (self::$MODE == 1 || self::$MODE == 3) {
             // Not sure if Chrome Logger allows chunking of header
             // If so, we can update this to match chunked cookies above
@@ -698,7 +696,7 @@ class QuantumPHPHandler extends AbstractProcessingHandler
     {
 
         if (!in_array($level, self::$statuses)) {
-            throw new \Exception('Debug status is not valid: ' . print_r($level, true));
+            throw new Exception('Debug status is not valid: ' . print_r($level, true));
         }
 
         $backtrace = debug_backtrace();

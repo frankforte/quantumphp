@@ -1,7 +1,4 @@
 <?php
-
-namespace FrankForte\QuantumPHP;
-
 /**
  * Copyright 2017-2024 Frank Forte
  *
@@ -20,6 +17,8 @@ namespace FrankForte\QuantumPHP;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+namespace FrankForte\QuantumPHP;
 
 /**
  * Server Side Firefox 57+ (Quantum) PHP debugger class
@@ -131,10 +130,8 @@ class QuantumPHP
 
     /**
      * @var array
-
      */
     protected $_debug_list;
-
 
     /**
      * @var array
@@ -175,9 +172,16 @@ class QuantumPHP
     protected $_processed = [];
 
     /**
+     * Whether we started sending logs into to the HTTP headers
+     *
+     * @var array
+     */
+    protected static $_started = false;
+
+    /**
      * constructor
      */
-    private function __construct()
+    public function __construct()
     {
         $this->_start_time = microtime(true);
         $this->_php_version = phpversion();
@@ -481,6 +485,7 @@ class QuantumPHP
      * checks if headers will be too large. If so, it
      * will remove notices first, then other types until
      * the header will be small enough.
+     *
      * @author Frank Forte <frank.forte@gmail.com>
      * @var array
      * @return string
