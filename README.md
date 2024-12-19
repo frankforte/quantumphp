@@ -83,6 +83,11 @@ Note: objects and arrays should be logged with the "add" method: `QuantumPHP::a
 // Optional if you do not have an autoloader
 include 'QuantumPHP.php';
 
+// use statement is required as of version 1.2.1
+// unless you make calls to the fully qualified class name, e.g.
+// \FrankForte\QuantumPHP\QuantumPHP::$MODE = 2;
+use FrankForte\QuantumPHP\QuantumPHP;
+
 // alternatively, using a class autoloader:
 // use FrankForte\QuantumPHP\QuantumPHP;
 
