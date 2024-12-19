@@ -101,14 +101,14 @@ class Cookie
             // These cookies will be rejected by some browsers
         }
 
-		$set = setcookie($c['name'], $c['value'], [
-			'expires' => $c['expires'],
-			'path' => '/',
-			'domain' => $c['domain'],
-			'samesite' => $c['samesite'],
-			'secure' => $c['secure'],
-			'httponly' => $c['httponly']
-		]);
+        $set = setcookie($c['name'], $c['value'], [
+            'expires' => $c['expires'],
+            'path' => '/',
+            'domain' => $c['domain'],
+            'samesite' => $c['samesite'],
+            'secure' => $c['secure'],
+            'httponly' => $c['httponly']
+        ]);
 
         if (false === $set) {
             // unable to send cookie

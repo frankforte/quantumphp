@@ -3,7 +3,7 @@ QuantumPHP is a PHP and JavaScript library that can log server side variables di
 
 
 ## Requirements
-- PHP 5.6 or later
+- PHP 7.3 or later
 
 
 ## Installation
@@ -83,7 +83,7 @@ Note: objects and arrays should be logged with the "add" method: `QuantumPHP::a
 // Optional if you do not have an autoloader
 include 'QuantumPHP.php';
 
-// use statement is required as of version 1.2.1
+// use statement is required as of version 1.2
 // unless you make calls to the fully qualified class name, e.g.
 // \FrankForte\QuantumPHP\QuantumPHP::$MODE = 2;
 use FrankForte\QuantumPHP\QuantumPHP;
