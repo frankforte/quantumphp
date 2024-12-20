@@ -18,11 +18,36 @@
 if(!console){
 	console = {};
 	var calls = ["log", "debug", "info", "warn", "error", "assert", "dir", "dirxml",
-    "group", "groupEnd", "time", "timeEnd", "count", "trace", "profile", "profileEnd","table"];
+	"group", "groupEnd", "time", "timeEnd", "count", "trace", "profile", "profileEnd","table"];
 	for(var i = 0; i < calls.length; i++){
 		console[calls[i]] = function(){};
 	}
 	window.console = console;
+}
+
+if(!console.table){
+	window.console.table = console.table = function(data){
+		var h = ""
+		for(var i in data){
+			for(var j in data[i]){
+				h += " | " + j
+			}
+			break;
+		}
+		console.log(h);
+		for(var i in data){
+			if(i == 0){ continue; }
+			var c = "";
+			for(var j in data[i]){
+				if(typeof(data[i][j]) == "string"){
+					c += " | "+data[i][j];
+				} else {
+					c += " | "+ JSON.stringify(data[i][j]);
+				}
+			}
+			console.log(c);
+		}
+	};
 }
 
 /**
